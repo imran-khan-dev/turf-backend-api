@@ -1,0 +1,103 @@
+// ====================
+// TURF PROFILE (Tenant)
+// ====================
+model TurfProfile {
+  id      String @id @default(uuid())
+  slug    String @unique // Public URL (example: turf/dhaka-premium)
+  ownerId String @unique
+  owner   User   @relation(fields: [ownerId], references: [id])
+
+  name String
+  logo String? // Image URL (Cloudinary / S3)
+
+  // Navigation Menu
+  navMenu NavMenuItem[] // Related model (1:N relationship)
+
+  // Top Bar Data
+  email         String?
+  phone         String?
+  openHours     String?
+  facebookLink  String?
+  instagramLink String?
+  whatsappLink  String?
+
+  // Hero Section
+  heroImage String?
+  heroTitle String?
+
+  // About Section
+  aboutTitle String?
+  aboutDesc  String?
+  aboutImg   String?
+
+  // Turf List Section
+  turfItems TurfField[]
+
+  // Features Section
+  features TurfFeature[]
+
+  // Gallery
+  gallery GalleryItem[]
+
+  // Contact Section
+  address       String?
+  googleMapLink String?
+
+  // Footer Section
+  footerText String?
+
+  //Approval Status
+  isApproved   Boolean   @default(false)
+  approvedAt   DateTime?
+  approvedById String?
+  approvedBy   Admin?    @relation(fields: [approvedById], references: [id]) // Relation 
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  turfUsers    TurfUser[]
+  turfManagers TurfManager[]
+  bookings     Booking[]
+}
+
+// ====================
+// TURF FIELDS (Individual Play Areas)
+// ====================
+model TurfField {
+  id            String      @id @default(uuid())
+  turfProfileId String
+  turf          TurfProfile @relation(fields: [turfProfileId], references: [id])
+
+  name         String
+  pricePerHour Int
+  available    Boolean @default(true)
+
+  bookings  Booking[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model NavMenuItem {
+  id            String @id @default(uuid())
+  turfProfileId String
+  label         String
+  link          String
+
+  turfProfile TurfProfile @relation(fields: [turfProfileId], references: [id])
+}
+
+model TurfFeature {
+  id            String  @id @default(uuid())
+  turfProfileId String
+  title         String
+  description   String?
+
+  turfProfile TurfProfile @relation(fields: [turfProfileId], references: [id])
+}
+
+model GalleryItem {
+  id            String @id @default(uuid())
+  turfProfileId String
+  image         String
+
+  turfProfile TurfProfile @relation(fields: [turfProfileId], references: [id])
+}

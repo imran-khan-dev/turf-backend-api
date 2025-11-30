@@ -1,0 +1,30 @@
+enum UserRole {
+  USER // regular customer if promoted
+  MANAGER
+  OWNER
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  MANAGER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  DELETED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  DUE
+  CANCELLED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}

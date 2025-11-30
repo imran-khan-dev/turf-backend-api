@@ -1,0 +1,26 @@
+model Booking {
+  id String @id @default(uuid())
+
+  turfProfileId String
+  turf          TurfProfile @relation(fields: [turfProfileId], references: [id])
+
+  turfFieldId String
+  turfField   TurfField @relation(fields: [turfFieldId], references: [id])
+
+  userId String? // global user (promoted or owner)
+  user   User?   @relation(fields: [userId], references: [id])
+
+  turfUserId String? // turf-specific user
+  turfUser   TurfUser? @relation(fields: [turfUserId], references: [id])
+
+  startTime DateTime
+  endTime   DateTime
+
+  paymentStatus PaymentStatus @default(PENDING)
+  paymentAmount Int?
+
+  status BookingStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

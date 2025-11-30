@@ -1,0 +1,97 @@
+// ====================
+// APP-LEVEL ADMINS
+// ====================
+model Admin {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  password     String
+  phone        String
+  name         String
+  role         AdminRole     @default(MANAGER_ADMIN)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  turfProfiles TurfProfile[]
+}
+
+// ====================
+// GLOBAL USERS (Owners / Managers / Promoted TurfUsers)
+// ====================
+model User {
+  id       String     @id @default(uuid())
+  email    String     @unique
+  password String
+  name     String
+  phone    String
+  photo    String?
+  role     UserRole // must be set explicitly in backend
+  status   UserStatus @default(ACTIVE)
+
+  // If promoted from TurfUser
+  promotedTurfUser TurfUser? @relation("promotedTurfUser")
+
+  bookings Booking[] // bookings made as global user
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  turfManagers TurfManager[]
+  isDeleted    Boolean       @default(false)
+  otp          OTP?
+  turfProfiles TurfProfile?
+}
+
+// ====================
+// TURF-SPECIFIC USERS (customers)
+// ====================
+model TurfUser {
+  id       String     @id @default(uuid())
+  email    String
+  password String?
+  name     String
+  phone    String
+  photo    String?
+  status   UserStatus @default(ACTIVE)
+
+  turfProfileId String
+  turf          TurfProfile @relation(fields: [turfProfileId], references: [id])
+
+  // If promoted → linked to global app user
+  appUserId String?   @unique
+  appUser   User?     @relation(fields: [appUserId], references: [id], name: "promotedTurfUser")
+  bookings  Booking[]
+  otp       OTP?
+  isDeleted Boolean   @default(false)
+
+  @@unique([email, turfProfileId]) // multi-tenant safe
+}
+
+// ====================
+// TURF MANAGERS
+// ====================
+model TurfManager {
+  id            String @id @default(uuid())
+  userId        String
+  turfProfileId String
+
+  user User        @relation(fields: [userId], references: [id])
+  turf TurfProfile @relation(fields: [turfProfileId], references: [id])
+}
+
+// ====================
+// OTP MODEL (optional, for verification)
+// ====================
+model OTP {
+  id         String  @id @default(uuid())
+  appUserId  String? // For global User
+  turfUserId String? // For turf-specific User
+
+  code      String
+  expiresAt DateTime
+
+  appUser  User?     @relation(fields: [appUserId], references: [id])
+  turfUser TurfUser? @relation(fields: [turfUserId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([appUserId])
+  @@unique([turfUserId])
+}
