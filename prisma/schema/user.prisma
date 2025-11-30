@@ -45,7 +45,7 @@ model User {
 model TurfUser {
   id       String     @id @default(uuid())
   email    String
-  password String?
+  password String
   name     String
   phone    String
   photo    String?

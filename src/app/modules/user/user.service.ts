@@ -1,11 +1,8 @@
 import { Prisma, User } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { prisma } from "../../../db";
+import { envVars } from "../../config/env";
 
-export interface PromoteManagerPayload {
-  turfUserId: string;
-  ownerId: string;
-}
 
 export interface PromoteManagerPayload {
   turfUserId: string;
@@ -18,7 +15,7 @@ const createTurfOwner = async (payload: Prisma.UserCreateInput): Promise<User> =
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) throw new Error("User already exists");
 
-  const hashedPassword = await hash(password, 10);
+  const hashedPassword = await hash(password, envVars.BCRYPT_SALT_ROUND);
 
   return prisma.user.create({
     data: {
