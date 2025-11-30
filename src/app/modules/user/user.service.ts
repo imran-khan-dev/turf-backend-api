@@ -10,12 +10,12 @@ export interface PromoteManagerPayload {
 }
 
 const createTurfOwner = async (payload: Prisma.UserCreateInput): Promise<User> => {
-  const { email, password, name, phone } = payload;
+  const { email, password, name, phone, photo } = payload;
 
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) throw new Error("User already exists");
 
-  const hashedPassword = await hash(password, envVars.BCRYPT_SALT_ROUND);
+  const hashedPassword = await hash(password, Number(envVars.BCRYPT_SALT_ROUND));
 
   return prisma.user.create({
     data: {
@@ -23,6 +23,7 @@ const createTurfOwner = async (payload: Prisma.UserCreateInput): Promise<User> =
       password: hashedPassword,
       name,
       phone,
+      photo,
       role: "OWNER",
     },
   });
@@ -60,9 +61,10 @@ const promoteToManager = async (
     const manager = await prismaTx.user.create({
       data: {
         email: turfUser.email,
-        password: turfUser.password || "", // use existing hashed password
+        password: turfUser.password || "",
         name: turfUser.name,
         phone: turfUser.phone,
+        photo: turfUser.photo || "",
         role: "MANAGER",
         promotedTurfUser: { connect: { id: turfUser.id } },
       },

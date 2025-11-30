@@ -1,10 +1,10 @@
 import httpStatus from 'http-status-codes';
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { AdminService } from './admin.service';
 
-const createAdminHandler = catchAsync(async (req: Request, res: Response) => {
+const createAdminHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const adminData = req.body;
     const result = await AdminService.createAdmin(adminData);
 

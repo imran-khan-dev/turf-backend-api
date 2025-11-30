@@ -1,12 +1,24 @@
 import httpStatus from 'http-status-codes';
 
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { PromoteManagerPayload, UserService } from "./user.service";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
+import { UserRole } from '@prisma/client';
 
-const createTurfOwnerHandler = catchAsync(async (req: Request, res: Response) => {
-  const turfOwnerData = req.body;
+const createTurfOwnerHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+  const { email, password, name, phone } = req.body;
+
+  if (!email || !password || !name || !phone) {
+    throw new Error("Missing required fields");
+  }
+
+  const photo = req.file ? req.file.path : undefined;
+
+  const turfOwnerData = { email, password, name, phone, role: UserRole.OWNER, ...(photo && { photo }) };
+
+
   const result = await UserService.createTurfOwner(turfOwnerData);
 
   sendResponse(res, {
@@ -18,7 +30,7 @@ const createTurfOwnerHandler = catchAsync(async (req: Request, res: Response) =>
 });
 
 
-const createTurfManagerHandler = catchAsync(async (req: Request, res: Response) => {
+const createTurfManagerHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { turfUserId } = req.body;
   const ownerId = req.user?.id as string;
 

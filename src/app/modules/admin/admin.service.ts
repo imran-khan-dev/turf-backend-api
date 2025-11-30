@@ -16,7 +16,7 @@ const createAdmin = async (payload: Prisma.AdminCreateInput): Promise<Admin> => 
     }
 
     // Hash password
-    const hashedPassword = await hash(password, envVars.BCRYPT_SALT_ROUND);
+    const hashedPassword = await hash(password, Number(envVars.BCRYPT_SALT_ROUND))
 
     // CREATE admin
     const admin = await prisma.admin.create({

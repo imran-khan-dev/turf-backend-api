@@ -1,10 +1,10 @@
 import httpStatus from 'http-status-codes';
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { TurfUserService } from './turfUser.service';
 
-const createTurfUserHandler = catchAsync(async (req: Request, res: Response) => {
+const createTurfUserHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const turfUserData = req.body;
     const result = await TurfUserService.createTurfUser(turfUserData);
 
