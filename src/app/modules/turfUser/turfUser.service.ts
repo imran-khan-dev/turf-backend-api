@@ -19,7 +19,7 @@ const createTurfUser = async (payload: {
 
     if (existingUser) throw new Error("Turf User already exists for this turf");
 
-    const hashedPassword = await hash(password, envVars.BCRYPT_SALT_ROUND);
+    const hashedPassword = await hash(password, Number(envVars.BCRYPT_SALT_ROUND));
 
     const turfUser = await prisma.turfUser.create({
         data: {

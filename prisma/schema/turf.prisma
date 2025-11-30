@@ -68,8 +68,10 @@ model TurfField {
   turf          TurfProfile @relation(fields: [turfProfileId], references: [id])
 
   name         String
-  pricePerHour Int
-  available    Boolean @default(true)
+  pricePerSlot Int // Price for 90-minute slot
+  slotDuration Int       @default(90) // duration in minutes
+  photos       String[] @default([])
+  available    Boolean  @default(true)
 
   bookings  Booking[]
   createdAt DateTime  @default(now())
