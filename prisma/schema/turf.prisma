@@ -47,7 +47,7 @@ model TurfProfile {
   footerText String?
 
   //Approval Status
-  isApproved   Boolean   @default(false)
+  isApproved   Boolean   @default(true)
   approvedAt   DateTime?
   approvedById String?
   approvedBy   Admin?    @relation(fields: [approvedById], references: [id]) // Relation 

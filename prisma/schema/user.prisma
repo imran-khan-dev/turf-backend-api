@@ -50,6 +50,7 @@ model TurfUser {
   phone    String
   photo    String?
   status   UserStatus @default(ACTIVE)
+  role     String @default("TURF_USER") // fixed role for turf-specific users
 
   turfProfileId String
   turf          TurfProfile @relation(fields: [turfProfileId], references: [id])

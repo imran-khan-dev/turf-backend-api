@@ -3,14 +3,15 @@ import express from 'express';
 import { TurfFieldController } from './turfField.controller';
 import { multerUpload } from '../../config/multer.config';
 import { createTurfFieldZodSchema, updateTurfFieldZodSchema } from './turfField.validation';
+import { checkAuth } from '../../middlewares/checkAuth';
 
 const router = express.Router();
 
-router.post("/create", multerUpload.array("photos", 5),
+router.post("/create", checkAuth("OWNER"), multerUpload.array("photos", 5),
     validateRequest(createTurfFieldZodSchema),
     TurfFieldController.createTurfFieldHandler);
 
-router.patch("/update/:id", multerUpload.array("photos", 5),
+router.patch("/update/:id", checkAuth("OWNER"), multerUpload.array("photos", 5),
     validateRequest(updateTurfFieldZodSchema),
     TurfFieldController.updateTurfFieldHandler);
 

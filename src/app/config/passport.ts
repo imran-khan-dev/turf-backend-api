@@ -25,7 +25,7 @@ passport.use(
 
                 const isPasswordMatched = await bcryptjs.compare(
                     password as string,
-                    isUserExist.passwordHash as string
+                    isUserExist.password as string
                 );
 
                 if (!isPasswordMatched) {
@@ -47,12 +47,14 @@ passport.serializeUser((user: any, done: (err: any, id?: unknown) => void) => {
 
 passport.deserializeUser(async (id: string, done: any) => {
 
-    const userIdNum = Number(id)
+    if (!id) {
+        return done(null, false);
+    }
 
     try {
         const user = await prisma.user.findUnique({
             where: {
-                id: userIdNum
+                id: id
             }
         });
         done(null, user);

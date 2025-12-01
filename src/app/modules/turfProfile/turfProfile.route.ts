@@ -3,10 +3,11 @@ import { TurfProfileController } from './turfProfile.controller';
 import { validateRequest } from '../../middlewares/validateRequest';
 import { multerUpload } from '../../config/multer.config';
 import { createTurfProfileZodSchema, updateTurfProfileZodSchema } from './turfProfile.validation';
+import { checkAuth } from '../../middlewares/checkAuth';
 
 const router = express.Router();
 
-router.post("/create/:id", multerUpload.fields([
+router.post("/create/:id", checkAuth("OWNER"), multerUpload.fields([
     { name: "logo", maxCount: 1 },
     { name: "heroImage", maxCount: 1 },
     { name: "aboutImg", maxCount: 1 },
@@ -14,7 +15,7 @@ router.post("/create/:id", multerUpload.fields([
     validateRequest(createTurfProfileZodSchema),
     TurfProfileController.createTurfProfileHandler);
 
-router.patch("/update/:id", multerUpload.fields([
+router.patch("/update/:id", checkAuth("OWNER"), multerUpload.fields([
     { name: "logo", maxCount: 1 },
     { name: "heroImage", maxCount: 1 },
     { name: "aboutImg", maxCount: 1 },
