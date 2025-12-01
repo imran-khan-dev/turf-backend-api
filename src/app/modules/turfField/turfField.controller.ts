@@ -12,7 +12,7 @@ const createTurfFieldHandler = catchAsync(
         if (req.files && Array.isArray(req.files)) {
             photos = req.files.map((file: any) => file.path);
         }
-        
+
         const payload = {
             turf: { connect: { id: turfProfileId } }, // relation
             name,
@@ -33,4 +33,35 @@ const createTurfFieldHandler = catchAsync(
     });
 
 
-export const TurfFieldController = { createTurfFieldHandler };
+
+const updateTurfFieldHandler = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const turfFieldId = req.params.id;
+        if (!turfFieldId) throw new Error("turfFieldId is required in params");
+
+        const bodyData = req.body;
+        let newPhotos: string[] = [];
+
+        // multiple files uploaded
+        if (req.files && Array.isArray(req.files)) {
+            newPhotos = req.files.map((file: any) => file.path);
+        }
+
+        const updatedField = await TurfFieldService.updateTurfField({
+            turfFieldId,
+            data: bodyData,
+            newPhotos,
+        });
+
+        sendResponse(res, {
+            success: true,
+            statusCode: httpStatus.OK,
+            message: "Turf Field updated successfully",
+            data: updatedField,
+        });
+    }
+);
+
+export const TurfFieldController = { createTurfFieldHandler, updateTurfFieldHandler };
+
+

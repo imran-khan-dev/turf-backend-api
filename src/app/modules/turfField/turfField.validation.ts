@@ -38,3 +38,12 @@ export const createTurfFieldZodSchema = z.object({
     turfProfileId: z
         .string().optional(),
 });
+
+
+export const updateTurfFieldZodSchema = z.object({
+  name: z.string().optional(),
+  pricePerSlot: z.string().transform(Number).optional(),
+  slotDuration: z.string().transform(Number).optional(),
+  available: z.boolean().optional(),
+  turfProfileId: z.string().uuid().optional(), // Only if updating relation
+});
