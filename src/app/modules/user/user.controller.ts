@@ -31,7 +31,18 @@ const createTurfOwnerHandler = catchAsync(async (req: Request, res: Response, ne
   });
 });
 
+const getAllOwnersHandler = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const owners = await UserService.getAllOwners();
 
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "All owners fetched successfully",
+      data: owners,
+    });
+  }
+);
 const createTurfManagerHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { turfUserId } = req.body;
   const ownerId = req.user ? req.user.id : "";
@@ -47,4 +58,23 @@ const createTurfManagerHandler = catchAsync(async (req: Request, res: Response, 
   });
 });
 
-export const UserController = { createTurfOwnerHandler, createTurfManagerHandler };
+const getManagersByTurfProfileHandler = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { turfProfileId } = req.params;
+
+    if (!turfProfileId) {
+      throw new Error("TurfProfileId parameter is required");
+    }
+
+    const managers = await UserService.getManagersByTurfProfile(turfProfileId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Managers for the turf profile fetched successfully",
+      data: managers,
+    });
+  }
+);
+
+export const UserController = { createTurfOwnerHandler, createTurfManagerHandler, getAllOwnersHandler, getManagersByTurfProfileHandler };
