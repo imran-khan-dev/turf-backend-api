@@ -1,7 +1,6 @@
 
 import { z } from "zod";
 
-export const UserStatusSchema = z.enum(["ACTIVE", "INACTIVE"]);
 
 export const createTurfUserZodSchema = z.object({
   email: z
@@ -38,5 +37,12 @@ export const createTurfUserZodSchema = z.object({
       message: "Photo must be a valid image URL ending with .jpg / .jpeg / .png / .webp",
     })
     .optional(),
+});
+
+export const updateTurfUserZodSchema = z.object({
+  name: z.string().optional(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+  status: z.enum(["ACTIVE", "INACTIVE"]).optional(),
 });
 

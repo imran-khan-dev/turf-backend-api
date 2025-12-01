@@ -77,4 +77,9 @@ const getManagersByTurfProfileHandler = catchAsync(
   }
 );
 
-export const UserController = { createTurfOwnerHandler, createTurfManagerHandler, getAllOwnersHandler, getManagersByTurfProfileHandler };
+export const UserController = {
+  createTurfOwnerHandler,
+  createTurfManagerHandler,
+  getAllOwnersHandler,
+  getManagersByTurfProfileHandler
+};

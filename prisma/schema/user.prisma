@@ -60,6 +60,8 @@ model TurfUser {
   bookings  Booking[]
   otp       OTP?
   isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@unique([email, turfProfileId]) // multi-tenant safe
 }
@@ -72,8 +74,10 @@ model TurfManager {
   userId        String
   turfProfileId String
 
-  user User        @relation(fields: [userId], references: [id])
-  turf TurfProfile @relation(fields: [turfProfileId], references: [id])
+  user      User        @relation(fields: [userId], references: [id])
+  turf      TurfProfile @relation(fields: [turfProfileId], references: [id])
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 }
 
 // ====================

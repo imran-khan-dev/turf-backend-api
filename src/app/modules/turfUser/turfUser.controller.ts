@@ -8,12 +8,14 @@ const createTurfUserHandler = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
 
         // If file uploaded via multer
-        const photo = req.file ? req.file.filename : undefined;
+        const photo = req.file?.path;
+
+        console.log("photocheckcreate", photo)
 
         // Merge form-data + file
         const turfUserData = {
             ...req.body,
-            photo,
+            ...(photo && { photo })
         };
 
         const result = await TurfUserService.createTurfUser(turfUserData);
@@ -27,4 +29,50 @@ const createTurfUserHandler = catchAsync(
     }
 );
 
-export const TurfUserController = { createTurfUserHandler };
+const updateTurfUserHandler = catchAsync(async (req, res) => {
+    const { id } = req.params;
+
+    const data = {
+        turfUserId: id,
+        ...req.body,
+    };
+
+    // Pass only req.file, NOT req.file.path
+    const result = await TurfUserService.updateTurfUserService(data, req.file);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Turf User updated successfully",
+        data: result,
+    });
+});
+
+const allTurfUserHandler = catchAsync(async (req: Request, res: Response) => {
+    const { turfProfileId } = req.params; 
+
+    const users = await TurfUserService.getAllTurfUsers(turfProfileId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Turf Users fetched successfully",
+        data: users,
+    });
+});
+
+const deleteTurfUserHandler = catchAsync(async (req: Request, res: Response) => {
+    const { turfUserId } = req.params;
+
+    const deletedUser = await TurfUserService.deleteTurfUser(turfUserId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Turf User deleted successfully",
+        data: deletedUser,
+    });
+});
+
+
+export const TurfUserController = { createTurfUserHandler, updateTurfUserHandler, allTurfUserHandler, deleteTurfUserHandler };

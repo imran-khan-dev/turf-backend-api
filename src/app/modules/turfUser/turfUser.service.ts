@@ -1,7 +1,18 @@
-import { Prisma, TurfUser } from "@prisma/client";
+import { Prisma, TurfUser, User, UserStatus } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { prisma } from "../../../db";
 import { envVars } from "../../config/env";
+import AppError from "../../errorHelpers/AppError";
+import { cloudinaryUpload, deleteImageFromCLoudinary } from "../../config/cloudinary.confiq";
+
+interface UpdateTurfUserInput {
+    turfUserId: string;
+    name?: string;
+    phone?: string;
+    photo?: string;
+    address?: string;
+    status?: UserStatus;
+}
 
 const createTurfUser = async (
     payload: {
@@ -10,7 +21,7 @@ const createTurfUser = async (
         name: string;
         phone: string;
         photo?: string;
-        turfProfileId: string; 
+        turfProfileId: string;
     }
 ): Promise<TurfUser> => {
     const { email, password, name, phone, photo, turfProfileId } = payload;
@@ -22,10 +33,10 @@ const createTurfUser = async (
 
     if (existingUser) throw new Error("Turf User already exists for this turf");
 
-   
+
     const hashedPassword = await hash(password, Number(envVars.BCRYPT_SALT_ROUND));
 
-   
+
     const prismaPayload: Prisma.TurfUserCreateInput = {
         email,
         password: hashedPassword,
@@ -35,29 +46,80 @@ const createTurfUser = async (
         turf: { connect: { id: turfProfileId } }, // This matches Prisma type
     };
 
- 
+
     const turfUser = await prisma.turfUser.create({ data: prismaPayload });
 
     return turfUser;
 };
 
+const updateTurfUserService = async (
+    data: UpdateTurfUserInput,
+    file?: Express.Multer.File
+): Promise<TurfUser> => {
+    const { turfUserId, ...updateData } = data;
 
-// const createTurfUser = async (payload: TurfUserInput) => {
+    const existingUser = await prisma.turfUser.findUnique({
+        where: { id: turfUserId },
+    });
 
-//     // Convert string boolean & numbers properly
-//     const finalPayload = {
-//       ...payload,
-//       phone: String(payload.phone),
-//       status: payload.status ? payload.status : "ACTIVE",
-//       turf: { connect: { id: payload.turfProfileId } },
-//       photo: payload.photo ?? undefined,
-//     };
+    if (!existingUser) throw new AppError(404, "Turf user not found");
 
-//     const result = await prisma.turfUser.create({
-//       data: finalPayload,
-//     });
+    if (file) {
+        if (existingUser.photo) {
+            await deleteImageFromCLoudinary(existingUser.photo);
+        }
 
-//     return result;
-//   }
+        const uploaded = await cloudinaryUpload.uploader.upload(file.path, {
+            folder: "turf_users",
+        });
 
-export const TurfUserService = { createTurfUser };
+        updateData.photo = uploaded.secure_url;
+    }
+
+    return await prisma.turfUser.update({
+        where: { id: turfUserId },
+        data: updateData,
+    });
+};
+
+const getAllTurfUsers = async (turfProfileId?: string): Promise<Partial<TurfUser>[]> => {
+    const whereClause = turfProfileId
+        ? { turfProfileId, isDeleted: false }
+        : { isDeleted: false };
+
+    const users = await prisma.turfUser.findMany({
+        where: whereClause,
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            photo: true,
+            status: true,
+            turfProfileId: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+    });
+
+    return users;
+};
+
+const deleteTurfUser = async (turfUserId: string): Promise<TurfUser> => {
+    const existingUser = await prisma.turfUser.findUnique({
+        where: { id: turfUserId },
+    });
+
+    if (!existingUser || existingUser.isDeleted) {
+        throw new AppError(404, "Turf user not found");
+    }
+
+    // Soft delete
+    return prisma.turfUser.update({
+        where: { id: turfUserId },
+        data: { isDeleted: true },
+    });
+};
+
+
+export const TurfUserService = { createTurfUser, updateTurfUserService, getAllTurfUsers, deleteTurfUser };
