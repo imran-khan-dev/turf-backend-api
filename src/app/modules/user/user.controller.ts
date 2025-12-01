@@ -6,6 +6,8 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { UserRole } from '@prisma/client';
 
+
+
 const createTurfOwnerHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 
   const { email, password, name, phone } = req.body;
@@ -32,9 +34,7 @@ const createTurfOwnerHandler = catchAsync(async (req: Request, res: Response, ne
 
 const createTurfManagerHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { turfUserId } = req.body;
-  const ownerId = req.user?.id as string;
-
-
+  const ownerId = req.user ? req.user.id : "";
 
   const payload: PromoteManagerPayload = { turfUserId, ownerId };
   const result = await UserService.promoteToManager(payload);

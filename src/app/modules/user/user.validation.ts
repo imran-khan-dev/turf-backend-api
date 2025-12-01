@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { UserRole } from "@prisma/client";
 
-export const createTurfOwnerSchema = z.object({
+export const createTurfOwnerZodSchema = z.object({
     name: z.string().min(2).max(50),
 
     email: z

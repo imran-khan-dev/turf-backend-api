@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createTurfProfileSchema = z.object({
+export const createTurfProfileZodSchema = z.object({
   // Required Fields
   slug: z
     .string()
