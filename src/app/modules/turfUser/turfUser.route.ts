@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.post("/register", multerUpload.single("file"), validateRequest(createTurfUserZodSchema), TurfUserController.createTurfUserHandler);
 router.patch("/update/:id", multerUpload.single("file"), validateRequest(updateTurfUserZodSchema), TurfUserController.updateTurfUserHandler);
-router.get("/all/:turfProfileId", TurfUserController.allTurfUserHandler);
+router.get("/all", TurfUserController.allTurfUserHandler);
 router.delete("/delete/:turfUserId", TurfUserController.deleteTurfUserHandler);
 
 

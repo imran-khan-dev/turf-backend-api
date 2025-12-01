@@ -6,8 +6,12 @@ import { createTurfFieldZodSchema } from './turfField.validation';
 
 const router = express.Router();
 
-router.post("/create", multerUpload.array("photos", 5), 
-validateRequest(createTurfFieldZodSchema), 
-TurfFieldController.createTurfFieldHandler);
+router.post("/create", multerUpload.array("photos", 5),
+    validateRequest(createTurfFieldZodSchema),
+    TurfFieldController.createTurfFieldHandler);
+
+// router.patch("/update/:id", multerUpload.array("photos", 5),
+//     validateRequest(updateTurfFieldZodSchema),
+//     TurfFieldController.updateTurfFieldHandler);
 
 export const TurfFieldRoutes = router;
