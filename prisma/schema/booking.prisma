@@ -23,4 +23,21 @@ model Booking {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  payment   Payment?
+
+  @@unique([turfFieldId, startTime, endTime])
+}
+
+model Payment {
+  id        String  @id @default(uuid())
+  bookingId String  @unique
+  booking   Booking @relation(fields: [bookingId], references: [id])
+
+  amount   Int
+  provider String
+  status   PaymentStatus @default(PENDING)
+  trxId    String? // transaction id from payment gateway
+  payload  Json? // raw response
+
+  createdAt DateTime @default(now())
 }

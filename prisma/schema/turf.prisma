@@ -69,13 +69,17 @@ model TurfField {
 
   name         String
   pricePerSlot Int // Price for 90-minute slot
-  slotDuration Int       @default(90) // duration in minutes
+  slotDuration Int      @default(90) // duration in minutes
   photos       String[] @default([])
   available    Boolean  @default(true)
+  openHour     String? 
+  closeHour    String?
+  isActive Boolean @default(true)
 
   bookings  Booking[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  
 }
 
 model NavMenuItem {
