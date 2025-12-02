@@ -23,7 +23,6 @@ export const seedAdmin = async () => {
       Number(envVars.BCRYPT_SALT_ROUND)
     );
 
-
     const payload: Prisma.UserCreateInput = {
       name: "Imran Khan",
       role: "ADMIN",

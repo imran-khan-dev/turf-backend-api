@@ -1,24 +1,20 @@
 import { Response } from "express";
+import { envVars } from "../config/env";
 
-export interface AuthTokens {
-  accessToken?: string;
-  refreshToken?: string;
-}
+export const setAuthCookie = (
+  res: Response,
+  tokens: { accessToken: string; refreshToken: string },
+  role: "owner" | "manager" | "turfUser" | "admin"
+) => {
+  res.cookie(`${role}Access`, tokens.accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: envVars.COOKIE_SAME_SITE as "none" | "lax" | "strict",
+  });
 
-export const setAuthCookie = (res: Response, tokenInfo: AuthTokens) => {
-  if (tokenInfo.accessToken) {
-    res.cookie("accessToken", tokenInfo.accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
-  }
-
-  if (tokenInfo.refreshToken) {
-    res.cookie("refreshToken", tokenInfo.refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
-  }
+  res.cookie(`${role}Refresh`, tokens.refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: envVars.COOKIE_SAME_SITE as "none" | "lax" | "strict",
+  });
 };

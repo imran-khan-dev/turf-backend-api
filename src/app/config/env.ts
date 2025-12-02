@@ -21,6 +21,8 @@ interface EnvConfig {
     CLOUDINARY_API_KEY: string;
     CLOUDINARY_API_SECRET: string;
   };
+  COOKIE_SECURE: string;
+  COOKIE_SAME_SITE: string;
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -41,6 +43,8 @@ const loadEnvVariables = (): EnvConfig => {
     "CLOUDINARY_CLOUD_NAME",
     "CLOUDINARY_API_KEY",
     "CLOUDINARY_API_SECRET",
+    "COOKIE_SECURE",
+    "COOKIE_SAME_SITE"
   ];
 
   requiredEnvVariables.forEach((key) => {
@@ -68,6 +72,8 @@ const loadEnvVariables = (): EnvConfig => {
       CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
     },
     FRONTEND_URL: process.env.FRONTEND_URL as string,
+    COOKIE_SECURE: process.env.COOKIE_SECURE as string,
+    COOKIE_SAME_SITE: process.env.COOKIE_SAME_SITE as string,
   };
 };
 

@@ -7,7 +7,7 @@ import { checkAuth } from '../../middlewares/checkAuth';
 
 const router = express.Router();
 
-router.post("/create/:id", checkAuth("OWNER"), multerUpload.fields([
+router.post("/create", checkAuth("OWNER"), multerUpload.fields([
     { name: "logo", maxCount: 1 },
     { name: "heroImage", maxCount: 1 },
     { name: "aboutImg", maxCount: 1 },
