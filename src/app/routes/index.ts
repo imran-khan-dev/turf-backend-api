@@ -6,7 +6,7 @@ import { AdminRoutes } from "../modules/admin/admin.route";
 import { TurfProfileRoutes } from "../modules/turfProfile/turfProfile.route";
 import { TurfFieldRoutes } from "../modules/turfField/turfField.route";
 import { BookingRoutes } from "../modules/booking/booking.routes";
-import { PaymentRoutes } from "../modules/payment/payment.routes";
+import { PaymentRoutes } from "../modules/payment/bkash.routes";
 
 
 export const router = Router();

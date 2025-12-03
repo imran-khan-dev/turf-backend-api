@@ -38,6 +38,18 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
+app.get("/cancel", (req: Request, res: Response) => {
+  res.status(200).json({
+    message: "Bkash Payment Cancelled!",
+  });
+});
+
+app.get("/success", (req: Request, res: Response) => {
+  res.status(200).json({
+    message: "Bkash Payment Success!",
+  });
+});
+
 app.use(globalErrorHandler);
 app.use(notFound);
 

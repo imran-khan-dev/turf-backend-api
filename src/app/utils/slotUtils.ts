@@ -1,4 +1,3 @@
-// src/modules/bookings/slotUtils.ts
 export type Slot = { start: string; end: string; startISO: string; endISO: string; status?: "AVAILABLE" | "BOOKED" | "PAST" };
 
 import { addMinutes, format, startOfDay, parseISO, isBefore, isAfter } from "date-fns";
@@ -9,7 +8,8 @@ import { addMinutes, format, startOfDay, parseISO, isBefore, isAfter } from "dat
  * - slotDuration in minutes (e.g. 90)
  */
 export function generateSlotsForDate(dateISO: string, startHour: string, endHour: string, slotDuration = 90): Slot[] {
-  const date = parseISO(dateISO); // dateISO should be "YYYY-MM-DDT00:00:00Z" or "YYYY-MM-DD"
+
+  const date = parseISO(dateISO);
   const dayStart = startOfDay(date);
   const [startH, startM] = startHour.split(":").map(Number);
   const [endH, endM] = endHour.split(":").map(Number);

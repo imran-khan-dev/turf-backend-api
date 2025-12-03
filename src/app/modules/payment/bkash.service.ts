@@ -1,106 +1,161 @@
-// src/modules/payments/bkash.service.ts
-import fetch from "node-fetch";
-import { envVars } from "../../config/env";
+import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 import { prisma } from "../../../db";
 
-/**
- * getBkashToken - obtain bKash token (access)
- * NOTE: adjust per bKash docs
- */
-async function getBkashToken() {
-    const resp = await fetch(`${envVars.BKASH_BASE_URL}/token/grant`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            app_key: envVars.BKASH_APP_KEY,
-            app_secret: envVars.BKASH_APP_SECRET,
-        }),
-    });
-
-    const data = await resp.json();
-    if (!resp.ok) throw new Error("BKASH token error: " + JSON.stringify(data));
-    // data.id_token or access_token depends on API
-    return data;
+/** -------------------------------
+ *  INTERFACES
+ * ------------------------------- */
+export interface BkashConfig {
+    base_url: string;
+    username: string;
+    password: string;
+    app_key: string;
+    app_secret: string;
 }
 
-/**
- * createBkashPayment - create checkout/payment session then return redirect URL
- * This is a simplified flow. Follow bKash guide exactly.
- */
-export async function createBkashPayment(paymentId: string, amount: number, bookingId: string) {
-    // 1. get token
-    const tokenResp = await getBkashToken();
-    const bkashToken = tokenResp?.id_token || tokenResp?.access_token;
-
-    // 2. create a payment session on bKash
-    const createResp = await fetch(`${envVars.BKASH_BASE_URL}/checkout/create`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${bkashToken}`,
-            "X-APP-Key": envVars.BKASH_APP_KEY,
-        },
-        body: JSON.stringify({
-            amount: String(amount),
-            intent: "sale",
-            merchantInvoiceNumber: paymentId,
-            callbackURL: `${envVars.APP_BASE_URL}/api/payments/bkash/webhook`, // bKash will post here
-            // optional: other details
-        }),
-    });
-
-    const createData = await createResp.json();
-    if (!createResp.ok) throw new Error("BKASH create error: " + JSON.stringify(createData));
-
-    // createData may contain a URL or a paymentID to redirect user
-    const paymentUrl = createData?.bkashURL || `${envVars.BKASH_PAYMENT_UI_BASE}/${createData.paymentID}`;
-
-    // update payment record with provider token/payload
-    await prisma.payment.update({
-        where: { id: paymentId },
-        data: { payload: createData, trxId: createData.paymentID },
-    });
-
-    return paymentUrl;
+export interface PaymentDetails {
+    amount: number;
+    callbackURL: string;
+    paymentID?: string;
+    reference?: string;
+    name?: string;
+    email?: string;
+    userId?: string;
 }
 
-/**
- * handleBkashWebhook - bKash will call this on payment success/cancel
- * We expect JSON body contains { paymentID, status, trxId, amount, merchantInvoiceNumber (our paymentId) }
- */
-export async function handleBkashWebhook(body: any) {
-    const paymentId = body?.merchantInvoiceNumber;
-    const status = body?.status; // adapt to bKash payload
-    const trxId = body?.trxId ?? body?.paymentID;
+/** -------------------------------
+ *  CREATE PAYMENT
+ * ------------------------------- */
+export async function createPayment(
+    bkashConfig: BkashConfig,
+    paymentDetails: PaymentDetails
+) {
+    try {
 
-    if (!paymentId) throw new Error("Invalid webhook: missing payment id");
 
-    // find payment
-    const payment = await prisma.payment.findUnique({ where: { id: paymentId } });
-    if (!payment) throw new Error("Payment not found");
+        const { amount, callbackURL, paymentID, reference } = paymentDetails;
 
-    // update payment record
-    const updated = await prisma.payment.update({
-        where: { id: paymentId },
-        data: {
-            status: status === "success" ? "PAID" : "CANCELLED",
-            trxId,
-            payload: body,
+        if (!amount || amount < 1) {
+            return { statusCode: 400, statusMessage: "Invalid amount" };
+        }
+
+        if (!callbackURL) {
+            return { statusCode: 400, statusMessage: "callbackURL is required" };
+        }
+
+        const response = await axios.post(
+            `${bkashConfig.base_url}/tokenized/checkout/create`,
+            {
+                mode: "0011",
+                currency: "BDT",
+                intent: "sale",
+                amount,
+                callbackURL,
+                payerReference: reference || "1",
+                merchantInvoiceNumber: paymentID || "",
+            },
+            { headers: await authHeaders(bkashConfig) }
+        );
+
+        return response.data;
+    } catch (error: any) {
+        console.error("Create bKash Payment Error:", error.message);
+        return { error: true, message: error.message };
+    }
+}
+
+/** -------------------------------
+ *  EXECUTE PAYMENT
+ * ------------------------------- */
+export async function executePayment(
+    bkashConfig: BkashConfig,
+    paymentID: string
+) {
+    try {
+        const response = await axios.post(
+            `${bkashConfig.base_url}/tokenized/checkout/execute`,
+            { paymentID },
+            { headers: await authHeaders(bkashConfig) }
+        );
+
+        return response.data;
+    } catch (error: any) {
+        console.error("bKash Execute Payment Error:", error.message);
+        return null;
+    }
+}
+
+/** -------------------------------
+ *  AUTH HEADERS
+ * ------------------------------- */
+async function authHeaders(bkashConfig: BkashConfig) {
+    return {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        authorization: await grantToken(bkashConfig),
+        "x-app-key": bkashConfig.app_key,
+    };
+}
+
+/** -------------------------------
+ *  GET OR REFRESH TOKEN  (PRISMA)
+ * ------------------------------- */
+async function grantToken(bkashConfig: BkashConfig): Promise<string | null> {
+    try {
+        const tokenRecord = await prisma.bkash.findFirst({
+            orderBy: { createdAt: "desc" },
+        });
+
+        const oneHourAgo = new Date(Date.now() - 3600000);
+
+        // Refresh token if older than 1 hour
+        if (!tokenRecord || tokenRecord.updatedAt < oneHourAgo) {
+            return await setToken(bkashConfig);
+        }
+
+        return tokenRecord.authToken;
+    } catch (error) {
+        console.error("Token lookup failed:", error);
+        return null;
+    }
+}
+
+/** -------------------------------
+ *  REQUEST NEW TOKEN (PRISMA)
+ * ------------------------------- */
+async function setToken(bkashConfig: BkashConfig): Promise<string> {
+    const response = await axios.post(
+        `${bkashConfig.base_url}/tokenized/checkout/token/grant`,
+        {
+            app_key: bkashConfig.app_key,
+            app_secret: bkashConfig.app_secret,
         },
-    });
+        {
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                username: bkashConfig.username,
+                password: bkashConfig.password,
+            },
+        }
+    );
 
-    // update booking on success
-    if (status === "success") {
-        await prisma.booking.update({
-            where: { id: payment.bookingId },
-            data: { paymentStatus: "PAID", status: "CONFIRMED" },
-        });
-    } else if (status === "cancel") {
-        await prisma.booking.update({
-            where: { id: payment.bookingId },
-            data: { paymentStatus: "PENDING", status: "CANCELLED" },
-        });
+    const idToken = response?.data?.id_token;
+
+    if (idToken) {
+        const existing = await prisma.bkash.findFirst();
+
+        if (existing) {
+            await prisma.bkash.update({
+                where: { id: existing.id },
+                data: { authToken: idToken },
+            });
+        } else {
+            await prisma.bkash.create({
+                data: { authToken: idToken },
+            });
+        }
     }
 
-    return updated;
+    return idToken;
 }

@@ -19,14 +19,12 @@ export const getFieldSlots = async (req: Request, res: Response) => {
     // get turf field and parent turf profile to read hours and slot duration
     const field = await prisma.turfField.findUnique({
         where: { id: fieldId },
-        include: { turf: true },
     });
     if (!field) return res.status(404).json({ message: "Field not found" });
 
-    const turf = field.turf;
-    // fallback hours — prefer turf.openHour/closeHour, else set default
-    const startHour = (turf as any).openHour ?? "08:00";
-    const endHour = (turf as any).closeHour ?? "23:00";
+    // fallback hours — prefer field.openHour/closeHour, else set default
+    const startHour = (field as any).openHour ?? "08:00";
+    const endHour = (field as any).closeHour ?? "23:00";
     const slotDuration = field.slotDuration ?? 90;
 
     const slots = generateSlotsForDate(String(date), startHour, endHour, slotDuration);
@@ -56,9 +54,7 @@ export const getFieldSlots = async (req: Request, res: Response) => {
 };
 
 /**
- * POST /api/bookings
  * Body: { turfProfileId, turfFieldId, startTimeISO, endTimeISO, paymentAmount, turfUserId? , userId? }
- * returns { booking, payment, paymentUrl }
  */
 export const createBooking = async (req: Request, res: Response) => {
     const { turfProfileId, turfFieldId, startTimeISO, endTimeISO, paymentAmount, turfUserId } = req.body;
@@ -78,10 +74,10 @@ export const createBooking = async (req: Request, res: Response) => {
 
         // create a bKash payment session for this payment and return payment URL
         // import payment service
-        const { createBkashPayment } = require("../payments/bkash.service");
-        const paymentUrl = await createBkashPayment(payment.id, paymentAmount, booking.id);
 
-        return res.json({ booking, payment, paymentUrl });
+        // const paymentUrl = await createBkashPayment(payment.id, paymentAmount, booking.id);
+
+        return res.json({ booking, payment });
     } catch (err: any) {
         return res.status(400).json({ message: err.message || "Booking failed" });
     }
@@ -92,11 +88,13 @@ export const createBooking = async (req: Request, res: Response) => {
  */
 export const getMyBookings = async (req: Request, res: Response) => {
     const auth = (req as any).user;
+    console.log("getBookings", auth)
     if (!auth) return res.status(401).json({ message: "not authenticated" });
 
     // if turf user
     if (auth.role === "TURF_USER" && auth.turfUserId) {
-        const bookings = await prisma.booking.findMany({ where: { turfUserId: auth.turfUserId } });
+        const bookings = await prisma.booking.findMany(
+            { where: { turfUserId: auth.turfUserId, turfProfileId: auth.turfProfileId } });
         return res.json(bookings);
     }
 

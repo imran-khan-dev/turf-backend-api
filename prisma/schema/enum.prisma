@@ -20,6 +20,7 @@ enum PaymentStatus {
   PAID
   DUE
   CANCELLED
+  FAILED
 }
 
 enum BookingStatus {

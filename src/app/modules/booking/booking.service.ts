@@ -58,36 +58,69 @@ export async function createBookingAndPayment({
     userId?: string;
     turfUserId?: string;
 }) {
-    // availability check as single transaction to reduce race condition window
-    const available = await checkAvailability(turfFieldId, startTimeISO, endTimeISO);
-    if (!available) {
-        throw new Error("Selected slot is no longer available");
-    }
+    return await prisma.$transaction(async (tx) => {
+        const conflict = await tx.booking.findFirst({
+            where: {
+                turfFieldId,
+                OR: [
+                    {
+                        startTime: { lt: new Date(endTimeISO) },
+                        endTime: { gt: new Date(startTimeISO) },
+                    },
+                ],
+            },
+        });
 
-    // create booking
-    const booking = await prisma.booking.create({
-        data: {
-            turfProfileId,
-            turfFieldId,
-            userId: userId ?? null,
-            turfUserId: turfUserId ?? null,
-            startTime: new Date(startTimeISO),
-            endTime: new Date(endTimeISO),
-            paymentStatus: PaymentStatus.PENDING,
-            paymentAmount,
-            status: BookingStatus.PENDING,
-        },
+        if (conflict) throw new Error("Selected slot is no longer available");
+
+        // Fetch user info if available
+        let payerUserId: string | null = null;
+        let payerUserName: string | null = null;
+        let payerUserEmail: string | null = null;
+
+        if (userId) {
+            const user = await tx.user.findUnique({ where: { id: userId } });
+            if (user) {
+                payerUserId = user.id;
+                payerUserName = user.name;
+                payerUserEmail = user.email;
+            }
+        } else if (turfUserId) {
+            const turfUser = await tx.turfUser.findUnique({ where: { id: turfUserId } });
+            if (turfUser) {
+                payerUserId = turfUser.id;
+                payerUserName = turfUser.name;
+                payerUserEmail = turfUser.email;
+            }
+        }
+
+        // Create booking
+        const booking = await tx.booking.create({
+            data: {
+                turfProfileId,
+                turfFieldId,
+                userId: userId ?? null,
+                turfUserId: turfUserId ?? null,
+                startTime: new Date(startTimeISO),
+                endTime: new Date(endTimeISO),
+                paymentAmount,
+                paymentStatus: PaymentStatus.PENDING,
+                status: BookingStatus.PENDING,
+            },
+        });
+
+        // Create payment with user info
+        const payment = await tx.payment.create({
+            data: {
+                bookingId: booking.id,
+                amount: paymentAmount,
+                status: PaymentStatus.PENDING,
+                payerId: payerUserId,
+                payerName: payerUserName,
+                payerEmail: payerUserEmail,
+            },
+        });
+
+        return { booking, payment };
     });
-
-    // create payment record
-    const payment = await prisma.payment.create({
-        data: {
-            bookingId: booking.id,
-            amount: paymentAmount,
-            provider: "BKASH",
-            status: PaymentStatus.PENDING,
-        },
-    });
-
-    return { booking, payment };
 }

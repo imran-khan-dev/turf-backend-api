@@ -24,10 +24,10 @@ interface EnvConfig {
   COOKIE_SECURE: string;
   COOKIE_SAME_SITE: string;
   BKASH_BASE_URL: string;
-  BKASH_APP_KEY: string;
-  BKASH_APP_SECRET: string;
-  BKASH_USER: string;
-  BKASH_PASS: string;
+  BKASH_CHECKOUT_URL_APP_KEY: string;
+  BKASH_CHECKOUT_URL_APP_SECRET: string;
+  BKASH_CHECKOUT_URL_USER_NAME: string;
+  BKASH_CHECKOUT_URL_PASSWORD: string;
   APP_BASE_URL: string;
 }
 
@@ -50,13 +50,13 @@ const loadEnvVariables = (): EnvConfig => {
     "CLOUDINARY_API_KEY",
     "CLOUDINARY_API_SECRET",
     "COOKIE_SECURE",
-    "COOKIE_SAME_SITE"
-    ,"BKASH_BASE_URL",
-    "BKASH_APP_KEY",
-    "BKASH_APP_SECRET",
-    "BKASH_USER",
-    "BKASH_PASS",
-    "APP_BASE_URL"
+    "COOKIE_SAME_SITE",
+    "BKASH_BASE_URL",
+    "BKASH_CHECKOUT_URL_APP_KEY",
+    "BKASH_CHECKOUT_URL_APP_SECRET",
+    "BKASH_CHECKOUT_URL_USER_NAME",
+    "BKASH_CHECKOUT_URL_PASSWORD",
+    "APP_BASE_URL",
   ];
 
   requiredEnvVariables.forEach((key) => {
@@ -87,10 +87,10 @@ const loadEnvVariables = (): EnvConfig => {
     COOKIE_SECURE: process.env.COOKIE_SECURE as string,
     COOKIE_SAME_SITE: process.env.COOKIE_SAME_SITE as string,
     BKASH_BASE_URL: process.env.BKASH_BASE_URL as string,
-    BKASH_APP_KEY: process.env.BKASH_APP_KEY as string,
-    BKASH_APP_SECRET: process.env.BKASH_APP_SECRET as string,
-    BKASH_USER: process.env.BKASH_USER as string,
-    BKASH_PASS: process.env.BKASH_PASS as string,
+    BKASH_CHECKOUT_URL_APP_KEY: process.env.BKASH_CHECKOUT_URL_APP_KEY as string,
+    BKASH_CHECKOUT_URL_APP_SECRET: process.env.BKASH_CHECKOUT_URL_APP_SECRET as string,
+    BKASH_CHECKOUT_URL_USER_NAME: process.env.BKASH_CHECKOUT_URL_USER_NAME as string,
+    BKASH_CHECKOUT_URL_PASSWORD: process.env.BKASH_CHECKOUT_URL_PASSWORD as string,
     APP_BASE_URL: process.env.APP_BASE_URL as string,
   };
 };
