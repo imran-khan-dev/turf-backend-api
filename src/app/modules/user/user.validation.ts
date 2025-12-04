@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { UserRole } from "@prisma/client";
 
 export const createTurfOwnerZodSchema = z.object({
     name: z.string().min(2).max(50),
@@ -26,6 +25,4 @@ export const createTurfOwnerZodSchema = z.object({
         .string()
         .regex(/^https?:\/\/.+\.(jpg|jpeg|png|webp)$/, "Invalid image URL")
         .optional(),
-
-    role: z.enum(UserRole),
 });
