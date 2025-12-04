@@ -100,7 +100,7 @@ export const checkAuth =
           token =
             req.cookies.ownerAccess ||
             req.cookies.managerAccess ||
-            req.cookies.turfAccess ||
+            req.cookies.turfUserAccess ||
             req.cookies.adminAccess ||
             undefined;
         }
