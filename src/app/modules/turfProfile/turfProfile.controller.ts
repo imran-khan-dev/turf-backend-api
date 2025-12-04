@@ -3,12 +3,13 @@ import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { TurfProfileService } from './turfProfile.service';
+import AppError from '../../errorHelpers/AppError';
 
 const createTurfProfileHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const ownerId = req.user ? req.user.id : "";
+    const ownerId = req.user ? req.user.userId : "";
 
     if (!ownerId) {
-        throw new Error("Unauthorized. Owner ID is missing.");
+        throw new AppError(401, "Unauthorized. Owner ID is missing.");
     }
 
     const body = req.body;

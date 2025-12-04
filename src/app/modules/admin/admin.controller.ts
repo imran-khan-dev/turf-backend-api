@@ -6,7 +6,6 @@ import { AdminService } from './admin.service';
 
 const createAdminHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const adminData = req.body;
-    console.log("admin", adminData)
     const result = await AdminService.createAdmin(adminData);
 
     sendResponse(res, {

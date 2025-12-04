@@ -51,7 +51,6 @@ export const getFieldSlots = async (req: Request, res: Response) => {
 
 export const createBooking = async (req: Request, res: Response) => {
     const { turfProfileId, turfFieldId, startTimeISO, endTimeISO, paymentAmount, turfUserId } = req.body;
-    // if user is a global user, you may read req.user (decoded) for userId
     const userId = (req as any).user?.id ?? undefined;
 
     try {
@@ -65,10 +64,6 @@ export const createBooking = async (req: Request, res: Response) => {
             turfUserId,
         });
 
-        // create a bKash payment session for this payment and return payment URL
-        // import payment service
-
-        // const paymentUrl = await createBkashPayment(payment.id, paymentAmount, booking.id);
 
         return res.json({ booking, payment });
     } catch (err: any) {
@@ -79,7 +74,6 @@ export const createBooking = async (req: Request, res: Response) => {
 
 export const getMyBookings = async (req: Request, res: Response) => {
     const auth = (req as any).user;
-    console.log("getBookings", auth)
     if (!auth) return res.status(401).json({ message: "not authenticated" });
 
     // if turf user

@@ -45,7 +45,7 @@ const getAllOwnersHandler = catchAsync(
 );
 const createTurfManagerHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { turfUserId } = req.body;
-  const ownerId = req.user ? req.user.id : "";
+  const ownerId = req.user ? req.user.userId : "";
 
   const payload: PromoteManagerPayload = { turfUserId, ownerId };
   const result = await UserService.promoteToManager(payload);

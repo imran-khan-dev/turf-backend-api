@@ -17,18 +17,13 @@ const makePayment = async (req: Request, res: Response) => {
 
         const { paymentId } = req.body;
 
-        console.log("paymentIdCheck", paymentId)
-
         if (!paymentId) return res.status(400).json({ message: "Payment ID is required" });
 
         const payment = await prisma.payment.findUnique({ where: { id: paymentId } });
 
-        console.log("paymentCheck", payment)
-
         if (!payment) return res.status(404).json({ message: "Payment not found" });
 
         const booking = await prisma.booking.findUnique({ where: { id: payment.bookingId } });
-        console.log("boookingCheck", booking)
 
         if (!booking) return res.status(404).json({ message: "Booking not found" });
 

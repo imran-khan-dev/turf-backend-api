@@ -5,7 +5,7 @@ import { Prisma } from '@prisma/client';
 
 export const seedAdmin = async () => {
   try {
-    const isAdminExist = await prisma.user.findUnique({
+    const isAdminExist = await prisma.admin.findUnique({
       where: {
         email: envVars.ADMIN_EMAIL
       }

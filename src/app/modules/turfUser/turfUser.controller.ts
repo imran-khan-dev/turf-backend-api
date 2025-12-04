@@ -10,8 +10,6 @@ const createTurfUserHandler = catchAsync(
         // If file uploaded via multer
         const photo = req.file?.path;
 
-        console.log("photocheckcreate", photo)
-
         // Merge form-data + file
         const turfUserData = {
             ...req.body,
