@@ -1,4 +1,3 @@
-// src/modules/bookings/booking.routes.ts
 import { Router } from "express";
 import { getFieldSlots, createBooking, getMyBookings } from "./booking.controller";
 import checkAuth from "../../middlewares/checkAuth";

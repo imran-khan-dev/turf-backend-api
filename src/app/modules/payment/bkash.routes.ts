@@ -1,4 +1,3 @@
-// src/modules/payments/payment.routes.ts
 import { Router } from "express";
 import { BkashController } from "./bkash.controller";
 import checkAuth from "../../middlewares/checkAuth";

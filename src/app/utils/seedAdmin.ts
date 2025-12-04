@@ -23,17 +23,18 @@ export const seedAdmin = async () => {
       Number(envVars.BCRYPT_SALT_ROUND)
     );
 
-    const payload: Prisma.UserCreateInput = {
+    const payload: Prisma.AdminCreateInput = {
       name: "Imran Khan",
-      role: "ADMIN",
+      role: "SUPER_ADMIN",
       email: envVars.ADMIN_EMAIL,
-      passwordHash: hashedPassword,
+      password: hashedPassword,
+      phone: envVars.ADMIN_PHONE
     };
 
-    const admin = await prisma.user.create({
+    const admin = await prisma.admin.create({
       data: payload
     });
-    console.log("Admin Created Successfuly! \n");
+    console.log("Super Admin Created Successfuly! \n");
     console.log(admin);
   } catch (error) {
     console.log(error);

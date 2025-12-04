@@ -1,15 +1,10 @@
 
-// src/modules/bookings/booking.controller.ts
 import { Request, Response } from "express";
 import { generateSlotsForDate } from "../../utils/slotUtils";
 import { prisma } from "../../../db";
-import { checkAvailability, createBookingAndPayment } from "./booking.service";
-import { envVars } from "../../config/env";
+import { createBookingAndPayment } from "./booking.service";
 
-/**
- * GET /api/fields/:fieldId/slots?date=2025-12-03
- * returns slots for that day with status AVAILABLE|BOOKED|PAST
- */
+
 export const getFieldSlots = async (req: Request, res: Response) => {
     const { fieldId } = req.params;
     const { date } = req.query; // expect YYYY-MM-DD
@@ -53,9 +48,7 @@ export const getFieldSlots = async (req: Request, res: Response) => {
     return res.json(enriched);
 };
 
-/**
- * Body: { turfProfileId, turfFieldId, startTimeISO, endTimeISO, paymentAmount, turfUserId? , userId? }
- */
+
 export const createBooking = async (req: Request, res: Response) => {
     const { turfProfileId, turfFieldId, startTimeISO, endTimeISO, paymentAmount, turfUserId } = req.body;
     // if user is a global user, you may read req.user (decoded) for userId
@@ -83,9 +76,7 @@ export const createBooking = async (req: Request, res: Response) => {
     }
 };
 
-/**
- * GET /api/bookings/my
- */
+
 export const getMyBookings = async (req: Request, res: Response) => {
     const auth = (req as any).user;
     console.log("getBookings", auth)

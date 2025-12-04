@@ -1,10 +1,7 @@
-// src/modules/bookings/booking.service.ts
 import { prisma } from "../../../db";
 import { BookingStatus, PaymentStatus } from "@prisma/client";
 
-/**
- * checkAvailability - returns true if slot is free (no overlapping CONFIRMED / PENDING bookings)
- */
+
 export async function checkAvailability(turfFieldId: string, startTimeISO: string, endTimeISO: string) {
     const conflict = await prisma.booking.findFirst({
         where: {
@@ -36,11 +33,7 @@ export async function checkAvailability(turfFieldId: string, startTimeISO: strin
     return !conflict;
 }
 
-/**
- * createBooking - create booking record (PENDING) and payment record (PENDING)
- * returns { booking, payment }
- * payer can be userId (global) OR turfUserId (tenant customer)
- */
+
 export async function createBookingAndPayment({
     turfProfileId,
     turfFieldId,

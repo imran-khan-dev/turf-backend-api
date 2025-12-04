@@ -121,8 +121,6 @@ const callback = async (req: Request, res: Response) => {
     }
 };
 
-
-
 export const BkashController = {
     makePayment,
     callback,
