@@ -21,10 +21,18 @@ const createTurfUser = async (
         name: string;
         phone: string;
         photo?: string;
-        turfProfileId: string;
+        turfProfileSlug: string;
     }
 ): Promise<TurfUser> => {
-    const { email, password, name, phone, photo, turfProfileId } = payload;
+    const { email, password, name, phone, photo, turfProfileSlug } = payload;
+
+    const turfProfile = await prisma.turfProfile.findUnique({
+        where: { slug: turfProfileSlug },
+    });
+
+    if (!turfProfile) throw new Error("Turf Profile not found");
+
+    const turfProfileId = turfProfile.id;
 
 
     const existingUser = await prisma.turfUser.findFirst({

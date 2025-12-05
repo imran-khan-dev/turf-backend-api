@@ -51,9 +51,17 @@ passport.use(
     new LocalStrategy(
         { usernameField: "email", passwordField: "password", passReqToCallback: true },
         async (req, email, password, done) => {
-            const { turfProfileId } = req.body;
+            const { turfProfileSlug } = req.body;
 
-            if (!turfProfileId) return done(null, false, { message: "Missing turfProfileId" });
+            if (!turfProfileSlug) return done(null, false, { message: "Missing turfProfileSlug" });
+
+            const turfProfile = await prisma.turfProfile.findUnique({
+                where: { slug: turfProfileSlug },
+            });
+
+            if (!turfProfile) return done(null, false, { message: "Turf Profile not found" });
+
+            const turfProfileId = turfProfile.id;
 
             try {
                 const user = await prisma.turfUser.findFirst({
