@@ -18,8 +18,7 @@ export const createTurfOwnerZodSchema = z.object({
 
     phone: z
         .string()
-        .regex(/^(?:\+8801\d{9}|01\d{9})$/, "Invalid Bangladesh phone number")
-        .optional(),
+        .regex(/^(?:\+8801\d{9}|01\d{9})$/, "Invalid Bangladesh phone number"),
 
     photo: z
         .string()

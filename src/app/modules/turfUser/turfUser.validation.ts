@@ -27,10 +27,9 @@ export const createTurfUserZodSchema = z.object({
       message: "Invalid Bangladesh phone number (Example: +8801XXXXXXXXX or 01XXXXXXXXX)",
     }),
 
-  turfProfileId: z
-    .string()
-    .uuid({ message: "turfProfileId must be a valid UUID" }),
-
+  turfProfileSlug: z
+    .string(),
+    
   photo: z
     .string()
     .regex(/^https?:\/\/.+\.(jpg|jpeg|png|webp)$/, {
