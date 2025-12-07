@@ -77,9 +77,27 @@ const getManagersByTurfProfileHandler = catchAsync(
   }
 );
 
+const myTrufProfile = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const auth = (req as any).user;
+
+    console.log("authCheck", auth)
+    const result = await UserService.getMyTurfProfile(auth.userId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "My turf profile fetched successfully",
+      data: result,
+    });
+  }
+);
+
+
 export const UserController = {
   createTurfOwnerHandler,
   createTurfManagerHandler,
   getAllOwnersHandler,
-  getManagersByTurfProfileHandler
+  getManagersByTurfProfileHandler,
+  myTrufProfile
 };

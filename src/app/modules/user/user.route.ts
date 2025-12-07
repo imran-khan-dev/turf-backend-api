@@ -15,6 +15,7 @@ router.get("/get-owners", checkAuth("ADMIN"), UserController.getAllOwnersHandler
 
 router.post("/create-manager", checkAuth("OWNER"), UserController.createTurfManagerHandler);
 router.get("/get-managers/:turfProfileId", checkAuth("OWNER"), UserController.getManagersByTurfProfileHandler);
+router.get("/my-turf-profile", checkAuth("OWNER"), UserController.myTrufProfile);
 
 
 export const UserRoutes = router;

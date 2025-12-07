@@ -159,9 +159,22 @@ const getManagersByTurfProfile = async (
   }));
 };
 
+const getMyTurfProfile = async (
+  userId: string
+): Promise<{ id: string; slug: string }[]> => {
+  return prisma.turfProfile.findMany({
+    where: { ownerId: userId },
+    select: {
+      id: true,
+      slug: true,
+    },
+  });
+};
+
 export const UserService = {
   createTurfOwner,
   promoteToManager,
   getAllOwners,
   getManagersByTurfProfile,
+  getMyTurfProfile
 };
