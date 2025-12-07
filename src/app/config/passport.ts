@@ -63,6 +63,7 @@ passport.use(
 
             const turfProfileId = turfProfile.id;
 
+            
             try {
                 const user = await prisma.turfUser.findFirst({
                     where: { email, turfProfileId }
