@@ -72,7 +72,7 @@ export const createBooking = async (req: Request, res: Response) => {
 };
 
 
-export const getMyBookings = async (req: Request, res: Response) => {
+export const getBookings = async (req: Request, res: Response) => {
     const auth = (req as any).user;
     if (!auth) return res.status(401).json({ message: "not authenticated" });
 
@@ -83,11 +83,30 @@ export const getMyBookings = async (req: Request, res: Response) => {
         return res.json(bookings);
     }
 
-    // global user
-    if (auth.userId) {
-        const bookings = await prisma.booking.findMany({ where: { userId: auth.userId } });
-        return res.json(bookings);
+    const ownerUserId = auth.userId
+
+    if (ownerUserId) {
+        const ownerBookings = await prisma.turfProfile.findUnique({
+            where: { ownerId: ownerUserId },
+            include: {
+                turfItems: {
+                    include: {
+                        bookings: {
+                            include: {
+                                user: true,       // If booked by global User
+                                turfUser: true,   // If booked by TurfUser
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+
+        return res.json(ownerBookings);
     }
+
 
     return res.status(403).json({ message: "No bookings found" });
 };
+export const bookingController = { getFieldSlots, createBooking, getBookings };
