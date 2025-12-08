@@ -1,5 +1,6 @@
 import { prisma } from "../../../db";
 import { BookingStatus, PaymentStatus } from "@prisma/client";
+import AppError from "../../errorHelpers/AppError";
 
 
 export async function checkAvailability(turfFieldId: string, startTimeISO: string, endTimeISO: string) {
@@ -37,17 +38,15 @@ export async function checkAvailability(turfFieldId: string, startTimeISO: strin
 export async function createBookingAndPayment({
     turfProfileId,
     turfFieldId,
-    startTimeISO,
-    endTimeISO,
-    paymentAmount,
+    startISO,
+    endISO,
     userId,
     turfUserId,
 }: {
     turfProfileId: string;
     turfFieldId: string;
-    startTimeISO: string;
-    endTimeISO: string;
-    paymentAmount: number;
+    startISO: string;
+    endISO: string;
     userId?: string;
     turfUserId?: string;
 }) {
@@ -57,8 +56,8 @@ export async function createBookingAndPayment({
                 turfFieldId,
                 OR: [
                     {
-                        startTime: { lt: new Date(endTimeISO) },
-                        endTime: { gt: new Date(startTimeISO) },
+                        startTime: { lt: new Date(endISO) },
+                        endTime: { gt: new Date(startISO) },
                     },
                 ],
             },
@@ -87,6 +86,13 @@ export async function createBookingAndPayment({
             }
         }
 
+        if (turfFieldId === null) throw new AppError(404, "Turf field not found");
+
+        const turfField = await tx.turfField.findUnique({ where: { id: turfFieldId, turfProfileId } });
+        if (!turfField) throw new AppError(404, "Turf field not found");
+
+        const paymentAmount = turfField.pricePerSlot as number;
+
         // Create booking
         const booking = await tx.booking.create({
             data: {
@@ -94,8 +100,8 @@ export async function createBookingAndPayment({
                 turfFieldId,
                 userId: userId ?? null,
                 turfUserId: turfUserId ?? null,
-                startTime: new Date(startTimeISO),
-                endTime: new Date(endTimeISO),
+                startTime: new Date(startISO),
+                endTime: new Date(endISO),
                 paymentAmount,
                 paymentStatus: PaymentStatus.PENDING,
                 status: BookingStatus.PENDING,

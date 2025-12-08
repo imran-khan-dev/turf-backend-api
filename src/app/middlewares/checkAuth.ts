@@ -105,6 +105,8 @@ export const checkAuth =
             undefined;
         }
 
+        console.log("checkToken", token)
+
         // 3️⃣ No token → unauthorized
         if (!token) {
           throw new AppError(401, "Unauthorized: No token provided");
@@ -113,6 +115,7 @@ export const checkAuth =
         // Decode token
         const decoded = verifyToken(token, envVars.JWT_ACCESS_SECRET) as JwtPayload;
 
+        console.log("decoedToken", decoded)
         // Role restriction
         if (!allowedRoles.includes(decoded.role)) {
           throw new AppError(403, "Forbidden: Access denied");
@@ -124,7 +127,7 @@ export const checkAuth =
         if (decoded.role === "OWNER" || decoded.role === "MANAGER") {
           user = await prisma.user.findUnique({ where: { id: decoded.userId } });
         } else if (decoded.role === "TURF_USER") {
-          user = await prisma.turfUser.findUnique({ where: { id: decoded.turfUserId } });
+          user = await prisma.turfUser.findUnique({ where: { id: decoded.userId } });
         } else if (decoded.role === "ADMIN") {
           user = await prisma.admin.findUnique({ where: { id: decoded.adminId } });
         }
@@ -133,6 +136,8 @@ export const checkAuth =
 
         // Attach to req
         req.user = { ...decoded, dbUser: user };
+
+        console.log("reqUser", req.user)
 
         next();
       } catch (error) {
