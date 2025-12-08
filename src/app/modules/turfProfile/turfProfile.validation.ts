@@ -51,35 +51,36 @@ export const createTurfProfileZodSchema = z.object({
 
 
 export const updateTurfProfileZodSchema = z.object({
-  slug: z.string().min(3).max(50).optional(),
-  name: z.string().min(2).max(100).optional(),
+  // Basic Info
+  slug: z.string().optional(),
+  name: z.string().optional(),
 
   // Top Bar
-  logo: z.string().url().optional(),
-  email: z.string().email().optional(),
-  phone: z
-    .string()
-    .regex(/^(?:\+8801\d{9}|01\d{9})$/, {
+  logo: z.string().optional(), // File handled via multer
+  email: z.union([z.string().email(), z.literal("")]).optional(),
+  phone: z.union([
+    z.string().regex(/^(?:\+8801\d{9}|01\d{9})$/, {
       message: "Invalid Bangladesh phone number. Format: +8801XXXXXXXXX or 01XXXXXXXXX",
-    })
-    .optional(),
+    }),
+    z.literal(""),
+  ]).optional(),
   openHours: z.string().optional(),
-  facebookLink: z.string().url().optional(),
-  instagramLink: z.string().url().optional(),
-  whatsappLink: z.string().url().optional(),
+  facebookLink: z.union([z.string().url(), z.literal("")]).optional(),
+  instagramLink: z.union([z.string().url(), z.literal("")]).optional(),
+  whatsappLink: z.union([z.string().url(), z.literal("")]).optional(),
 
   // Hero Section
-  heroImage: z.string().url().optional(),
+  heroImage: z.string().optional(), // File handled via multer
   heroTitle: z.string().optional(),
 
   // About Section
   aboutTitle: z.string().optional(),
   aboutDesc: z.string().optional(),
-  aboutImg: z.string().url().optional(),
+  aboutImg: z.string().optional(), // File handled via multer
 
   // Contact Section
   address: z.string().optional(),
-  googleMapLink: z.string().url().optional(),
+  googleMapLink: z.union([z.string().url(), z.literal("")]).optional(),
 
   // Footer Section
   footerText: z.string().optional(),
