@@ -16,7 +16,7 @@ router.patch("/update/:id", checkAuth("OWNER"), multerUpload.array("photos", 5),
     TurfFieldController.updateTurfFieldHandler);
 
 router.get("/get-fields/:turfProfileId", TurfFieldController.getAllTurfFieldsHandler);
-
+router.get("/get-field/:id", TurfFieldController.getFieldHandler);
 
 
 export const TurfFieldRoutes = router;

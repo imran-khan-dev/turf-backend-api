@@ -64,16 +64,8 @@ const turfUserLogin = (req: Request, res: Response, next: NextFunction) => {
       return next(new AppError(401, info?.message ?? "Invalid Credentials"));
     }
 
-    const payload = {
-      turfUserId: user.id,
-      email: user.email,
-      role: "TURF_USER",
-    };
 
-    const tokens = {
-      accessToken: signToken(payload, envVars.JWT_ACCESS_SECRET, envVars.JWT_ACCESS_EXPIRES),
-      refreshToken: signToken(payload, envVars.JWT_REFRESH_SECRET, envVars.JWT_REFRESH_EXPIRES),
-    };
+    const tokens = createUserTokens(user);
 
     const { password, ...rest } = user;
 

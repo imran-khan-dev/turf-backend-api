@@ -4,6 +4,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { TurfFieldService } from "./turfField.service";
 import { prisma } from '../../../db';
+import ca from 'zod/v4/locales/ca.cjs';
 
 const createTurfFieldHandler = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
@@ -63,6 +64,22 @@ const updateTurfFieldHandler = catchAsync(
     }
 );
 
+const getFieldHandler = catchAsync(async (req: Request, res: Response) => {
+    
+        const fieldId = req.params.id as string;
+
+        if (!fieldId) throw new Error("fieldId is required in params");
+        const turfField = await prisma.turfField.findUnique({
+            where: { id: fieldId },
+            include: { turf: true },
+        });
+        sendResponse(res, {
+            success: true,
+            statusCode: httpStatus.OK,
+            message: "Turf Field fetched successfully",
+            data: turfField,
+        });
+})
 
 const getAllTurfFieldsHandler = catchAsync(async (req: Request, res: Response) => {
     const turfProfileId = req.params.turfProfileId as string;
@@ -79,6 +96,6 @@ const getAllTurfFieldsHandler = catchAsync(async (req: Request, res: Response) =
     });
 })
 
-export const TurfFieldController = { createTurfFieldHandler, updateTurfFieldHandler, getAllTurfFieldsHandler };
+export const TurfFieldController = { createTurfFieldHandler, updateTurfFieldHandler, getAllTurfFieldsHandler, getFieldHandler };
 
 
