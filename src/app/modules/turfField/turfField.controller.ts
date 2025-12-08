@@ -64,6 +64,21 @@ const updateTurfFieldHandler = catchAsync(
 );
 
 
-export const TurfFieldController = { createTurfFieldHandler, updateTurfFieldHandler };
+const getAllTurfFieldsHandler = catchAsync(async (req: Request, res: Response) => {
+    const turfProfileId = req.params.turfProfileId as string;
+    if (!turfProfileId) throw new Error("turfProfileId is required in params");
+    const turfFields = await prisma.turfField.findMany({
+        where: { turfProfileId },
+        include: { turf: true },
+    });
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Turf Fields fetched successfully",
+        data: turfFields,
+    });
+})
+
+export const TurfFieldController = { createTurfFieldHandler, updateTurfFieldHandler, getAllTurfFieldsHandler };
 
 
