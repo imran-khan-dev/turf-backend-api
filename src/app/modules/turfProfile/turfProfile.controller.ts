@@ -82,5 +82,21 @@ const updateTurfProfileHandler = catchAsync(
     }
 );
 
+const getTurfProfileHandler = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const turfProfileSlug = req.params.slug;
 
-export const TurfProfileController = { createTurfProfileHandler, updateTurfProfileHandler };
+        if (!turfProfileSlug) throw new Error("TurfProfileSlug parameter is required");
+
+        const turfProfile = await TurfProfileService.getTurfProfile(turfProfileSlug);
+
+        sendResponse(res, {
+            success: true,
+            statusCode: httpStatus.OK,
+            message: "Turf Profile fetched successfully",
+            data: turfProfile,
+        });
+    }
+);
+
+export const TurfProfileController = { createTurfProfileHandler, updateTurfProfileHandler, getTurfProfileHandler };

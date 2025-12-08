@@ -19,9 +19,6 @@ export const createTurfProfileZodSchema = z.object({
   email: z.string().email().optional(),
   phone: z
     .string()
-    .regex(/^(?:\+8801\d{9}|01\d{9})$/, {
-      message: "Invalid Bangladesh phone number. Format: +8801XXXXXXXXX or 01XXXXXXXXX",
-    })
     .optional(),
   openHours: z.string().optional(),
   facebookLink: z.string().url().optional(),
