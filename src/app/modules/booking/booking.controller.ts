@@ -229,10 +229,7 @@ export const getBookings = async (req: Request, res: Response) => {
 };
 
 export const getBookingById = async (req: Request, res: Response) => {
-    const auth = (req as any).user;
     const bookingId = req.params.id;
-
-    if (!auth) return res.status(401).json({ message: "Not authenticated" });
 
     if (!bookingId) return res.status(400).json({ message: "Booking ID required" });
 

@@ -38,13 +38,13 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-app.get("/cancel", (req: Request, res: Response) => {
+app.get("/payment/cancel", (req: Request, res: Response) => {
   res.status(200).json({
     message: "Bkash Payment Cancelled!",
   });
 });
 
-app.get("/success", (req: Request, res: Response) => {
+app.get("/payment/success", (req: Request, res: Response) => {
   res.status(200).json({
     message: "Bkash Payment Success!",
   });

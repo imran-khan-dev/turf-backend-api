@@ -27,7 +27,13 @@ const makePayment = async (req: Request, res: Response) => {
 
         if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-        const callbackURL = `${envVars.APP_BASE_URL}/api/v1/payment/callback`;
+        const turfPrfile = await prisma.turfProfile.findUnique({ where: { id: booking.turfProfileId } });
+
+        if (!turfPrfile) return res.status(404).json({ message: "Turf Profile not found" });
+
+        const callbackURL = `${envVars.APP_BASE_URL}/api/v1/payment/callback?dBPayId=${encodeURIComponent(paymentId)}&turfProfileSlug=${encodeURIComponent(turfPrfile.slug)}`;
+
+        console.log("callbackurl", callbackURL)
 
         const paymentDetails = {
             amount: payment.amount,
@@ -44,10 +50,6 @@ const makePayment = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Payment failed" });
         }
 
-        await prisma.payment.update({
-            where: { id: paymentId },
-            data: { status: "PAID" },
-        });
 
         return res.json({
             message: "Payment created",
@@ -61,27 +63,38 @@ const makePayment = async (req: Request, res: Response) => {
 
 const callback = async (req: Request, res: Response) => {
     try {
-        const { paymentID } = req.query;
+        const { paymentID, dBPayId, turfProfileSlug } = req.query;
         const origin = envVars.FRONTEND_URL;
 
+        const dbPaymentId = await prisma.payment.findUnique({ where: { id: dBPayId as string } });
+
+
         if (!paymentID || typeof paymentID !== "string") {
-            return res.redirect(`${origin}/cancel`);
+            return res.redirect(`${origin}/payment/cancel?bookingId=${dbPaymentId?.bookingId}&turfProfileSlug=${turfProfileSlug}`);
         }
+
+
+
+        console.log("thefucking", dbPaymentId)
 
         const executeResponse = await executePayment(bkashConfig, paymentID);
         console.log("Execute Payment Response:", executeResponse);
 
-        if (!executeResponse) {
-            return res.redirect(`${origin}/cancel`);
+        if (executeResponse.statusCode !== "0000") {
+            return res.redirect(`${origin}/payment/cancel?bookingId=${dbPaymentId?.bookingId}&turfProfileSlug=${turfProfileSlug}`);
         }
 
         const success = executeResponse.statusCode === "0000";
+        console.log("codeSuccess?:", success)
         const appPaymentId = executeResponse.merchantInvoiceNumber;
 
         if (!appPaymentId) {
             console.error("Missing merchantInvoiceNumber!");
-            return res.redirect(`${origin}/cancel`);
+            return res.redirect(`${origin}/payment/cancel?bookingId=${dbPaymentId?.bookingId}&turfProfileSlug=${turfProfileSlug}`);
         }
+
+
+        console.log("apppayId", appPaymentId)
 
         // Transaction because we update 2 tables
         await prisma.$transaction(async (tx) => {
@@ -92,7 +105,7 @@ const callback = async (req: Request, res: Response) => {
                     status: success ? "PAID" : "FAILED",
                     trxId: executeResponse.trxID || null,
                     providerPaymentStatus: executeResponse.transactionStatus || null,
-                    providerPaymentId: executeResponse.paymentID,
+                    providerPaymentId: executeResponse.paymentID || null,
                     amountPaid: parseFloat(executeResponse.amount) || null,
                     providerResponse: executeResponse,
                     paidAt: success ? new Date() : null,
@@ -103,12 +116,12 @@ const callback = async (req: Request, res: Response) => {
             if (success) {
                 await tx.booking.update({
                     where: { id: executeResponse.payerReference },
-                    data: { status: "CONFIRMED" },
+                    data: { status: "CONFIRMED", paymentStatus: "PAID" },
                 });
             }
         });
 
-        return res.redirect(success ? `${origin}/success` : `${origin}/cancel`);
+        return res.redirect(`${origin}/payment/success?bookingId=${executeResponse.payerReference}&turfProfileSlug=${turfProfileSlug}`);
 
     } catch (err) {
         console.error(err);
