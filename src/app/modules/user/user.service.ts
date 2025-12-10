@@ -89,9 +89,11 @@ const getAllOwners = async (): Promise<
     role: string;
     createdAt: Date;
     updatedAt: Date;
-    turfProfileIds: string[];
+    turfProfileSlug: string[];
   }[]
 > => {
+
+
   const owners = await prisma.user.findMany({
     where: { role: "OWNER" },
     select: {
@@ -104,14 +106,14 @@ const getAllOwners = async (): Promise<
       createdAt: true,
       updatedAt: true,
       turfProfiles: {
-        select: { id: true },
+        select: { slug: true },
       },
     },
   });
 
   return owners.map((owner) => ({
     ...owner,
-    turfProfileIds: owner.turfProfiles ? [owner.turfProfiles.id] : [],
+    turfProfileSlug: owner.turfProfiles ? [owner.turfProfiles.slug] : [],
     turfProfiles: undefined,
   }));
 };

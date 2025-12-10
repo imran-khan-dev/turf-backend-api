@@ -113,6 +113,31 @@ const getAllTurfUsers = async (turfProfileId?: string): Promise<Partial<TurfUser
     return users;
 };
 
+const getAllTurfUsersByAdmin = async () => {
+    const users = await prisma.turfUser.findMany({
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            photo: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+
+            turf: {
+                select: {
+                    slug: true,
+                },
+            },
+        },
+    });
+
+    return users;
+};
+
+
+
 const deleteTurfUser = async (turfUserId: string): Promise<TurfUser> => {
     const existingUser = await prisma.turfUser.findUnique({
         where: { id: turfUserId },
@@ -130,4 +155,4 @@ const deleteTurfUser = async (turfUserId: string): Promise<TurfUser> => {
 };
 
 
-export const TurfUserService = { createTurfUser, updateTurfUserService, getAllTurfUsers, deleteTurfUser };
+export const TurfUserService = { createTurfUser, updateTurfUserService, getAllTurfUsers, deleteTurfUser, getAllTurfUsersByAdmin };

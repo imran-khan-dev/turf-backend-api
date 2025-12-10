@@ -17,6 +17,7 @@ router.patch("/update/:id", checkAuth("TURF_USER"),
     TurfUserController.updateTurfUserHandler);
 
 router.get("/all", checkAuth("OWNER"), TurfUserController.allTurfUserHandler);
+router.get("/all-turf-users-admin", checkAuth("ADMIN", "SUPER_ADMIN"), TurfUserController.getAllTurfUsersByAdmin);
 
 router.delete("/delete/:turfUserId", checkAuth("ADMIN", "TURF_USER"), TurfUserController.deleteTurfUserHandler);
 

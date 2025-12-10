@@ -11,7 +11,7 @@ router.post("/register-owner", multerUpload.single("file"),
     validateRequest(createTurfOwnerZodSchema),
     UserController.createTurfOwnerHandler);
 
-router.get("/get-owners", checkAuth("ADMIN"), UserController.getAllOwnersHandler);
+router.get("/get-owners", checkAuth("ADMIN", "SUPER_ADMIN"), UserController.getAllOwnersHandler);
 
 router.post("/create-manager", checkAuth("OWNER"), UserController.createTurfManagerHandler);
 router.get("/get-managers/:turfProfileId", checkAuth("OWNER"), UserController.getManagersByTurfProfileHandler);

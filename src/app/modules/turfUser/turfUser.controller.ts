@@ -59,6 +59,17 @@ const allTurfUserHandler = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getAllTurfUsersByAdmin = catchAsync(async (req: Request, res: Response) => {
+    const users = await TurfUserService.getAllTurfUsersByAdmin();
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Turf Users fetched successfully",
+        data: users,
+    });
+})
+
 const deleteTurfUserHandler = catchAsync(async (req: Request, res: Response) => {
     const { turfUserId } = req.params;
 
@@ -73,4 +84,4 @@ const deleteTurfUserHandler = catchAsync(async (req: Request, res: Response) => 
 });
 
 
-export const TurfUserController = { createTurfUserHandler, updateTurfUserHandler, allTurfUserHandler, deleteTurfUserHandler };
+export const TurfUserController = { createTurfUserHandler, updateTurfUserHandler, allTurfUserHandler, deleteTurfUserHandler, getAllTurfUsersByAdmin };
