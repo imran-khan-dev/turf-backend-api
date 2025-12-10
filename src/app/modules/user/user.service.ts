@@ -28,55 +28,55 @@ const createTurfOwner = async (payload: Prisma.UserCreateInput): Promise<User> =
   });
 };
 
-const promoteToManager = async (
-  payload: PromoteManagerPayload
-): Promise<User> => {
-  const { turfUserId, ownerId } = payload;
+// const promoteToManager = async (
+//   payload: PromoteManagerPayload
+// ): Promise<User> => {
+//   const { turfUserId, ownerId } = payload;
 
-  const owner = await prisma.user.findUnique({ where: { id: ownerId } });
-  if (!owner || owner.role !== "OWNER") throw new Error("Owner not found or invalid");
+//   const owner = await prisma.user.findUnique({ where: { id: ownerId } });
+//   if (!owner || owner.role !== "OWNER") throw new Error("Owner not found or invalid");
 
-  const turfUser = await prisma.turfUser.findUnique({ where: { id: turfUserId } });
-  if (!turfUser) throw new Error("Turf user not found");
+//   const turfUser = await prisma.turfUser.findUnique({ where: { id: turfUserId } });
+//   if (!turfUser) throw new Error("Turf user not found");
 
-  const existingUser = await prisma.user.findFirst({
-    where: { promotedTurfUser: { id: turfUserId } },
-  });
+//   const existingUser = await prisma.user.findFirst({
+//     where: { promotedTurfUser: { id: turfUserId } },
+//   });
 
-  if (existingUser && existingUser.role === "MANAGER") {
-    throw new Error("Turf user is already a manager");
-  }
+//   if (existingUser && existingUser.role === "MANAGER") {
+//     throw new Error("Turf user is already a manager");
+//   }
 
-  const [newManager] = await prisma.$transaction(async (prismaTx) => {
-    const manager = await prismaTx.user.create({
-      data: {
-        email: turfUser.email,
-        password: turfUser.password || "",
-        name: turfUser.name,
-        phone: turfUser.phone,
-        photo: turfUser.photo || "",
-        role: "MANAGER",
-        promotedTurfUser: { connect: { id: turfUser.id } },
-      },
-    });
+//   const [newManager] = await prisma.$transaction(async (prismaTx) => {
+//     const manager = await prismaTx.user.create({
+//       data: {
+//         email: turfUser.email,
+//         password: turfUser.password || "",
+//         name: turfUser.name,
+//         phone: turfUser.phone,
+//         photo: turfUser.photo || "",
+//         role: "MANAGER",
+//         promotedTurfUser: { connect: { id: turfUser.id } },
+//       },
+//     });
 
-    await prismaTx.turfManager.create({
-      data: {
-        userId: manager.id,
-        turfProfileId: turfUser.turfProfileId,
-      },
-    });
+//     await prismaTx.turfManager.create({
+//       data: {
+//         userId: manager.id,
+//         turfProfileId: turfUser.turfProfileId,
+//       },
+//     });
 
-    await prismaTx.turfUser.update({
-      where: { id: turfUser.id },
-      data: { appUserId: manager.id },
-    });
+//     await prismaTx.turfUser.update({
+//       where: { id: turfUser.id },
+//       data: { appUserId: manager.id },
+//     });
 
-    return [manager];
-  });
+//     return [manager];
+//   });
 
-  return newManager;
-};
+//   return newManager;
+// };
 
 
 const getAllOwners = async (): Promise<
@@ -175,7 +175,7 @@ const getMyTurfProfile = async (
 
 export const UserService = {
   createTurfOwner,
-  promoteToManager,
+  // promoteToManager,
   getAllOwners,
   getManagersByTurfProfile,
   getMyTurfProfile

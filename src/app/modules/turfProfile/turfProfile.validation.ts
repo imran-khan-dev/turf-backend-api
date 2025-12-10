@@ -34,10 +34,6 @@ export const createTurfProfileZodSchema = z.object({
   aboutDesc: z.string().optional(),
   aboutImg: z.string().url().optional(),
 
-  // Turf List, Features, Gallery → Will be created separately
-  // That's why we ignore them here in this schema
-  // navMenu, turfItems, features, gallery  --> Not validated here
-
   // Contact Section
   address: z.string().optional(),
   googleMapLink: z.string().url().optional(),

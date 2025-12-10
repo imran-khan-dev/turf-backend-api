@@ -136,8 +136,6 @@ const getAllTurfUsersByAdmin = async () => {
     return users;
 };
 
-
-
 const deleteTurfUser = async (turfUserId: string): Promise<TurfUser> => {
     const existingUser = await prisma.turfUser.findUnique({
         where: { id: turfUserId },

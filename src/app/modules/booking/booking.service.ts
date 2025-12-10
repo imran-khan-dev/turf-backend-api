@@ -75,16 +75,6 @@ export async function createBookingAndPayment({
             payerUserEmail = user.email;
 
         }
-        // } else if (turfUserId) {
-        //     const turfUser = await tx.turfUser.findUnique({ where: { id: turfUserId } });
-        //     if (turfUser) {
-        //         payerUserId = turfUser.userId;
-        //         payerUserName = turfUser.name;
-        //         payerUserEmail = turfUser.email;
-        //     }
-        // }
-
-
 
 
         if (turfFieldId === null) throw new AppError(404, "Turf field not found");
@@ -126,8 +116,6 @@ export async function createBookingAndPayment({
 }
 
 
-
-
 interface BookingFilters {
     status?: string;
     startDate?: string;
@@ -150,13 +138,6 @@ export const getBookingsService = async (
         if (startDate) baseWhere.startTime.gte = new Date(startDate);
         if (endDate) baseWhere.startTime.lte = new Date(endDate);
     }
-    // if (turfFieldId) baseWhere.turfFieldId = turfFieldId;
-
-    console.log("AuthRole", auth)
-
-    console.log('checkBase', baseWhere)
-    console.log("authField", auth.turfProfileId)
-
 
     // --- Turf User Logic ---
     if (auth.role === "TURF_USER" && auth.userId) {
@@ -177,7 +158,6 @@ export const getBookingsService = async (
             orderBy: { startTime: "desc" },
         });
 
-        console.log("turfUserBooking", bookings)
         const total = await prisma.booking.count({
             where: {
                 turfUserId: auth.turfUserId,
@@ -189,7 +169,6 @@ export const getBookingsService = async (
 
         });
 
-        console.log("turfUserBook", bookings)
         return { bookings, total };
     }
 

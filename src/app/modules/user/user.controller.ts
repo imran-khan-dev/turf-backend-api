@@ -43,20 +43,20 @@ const getAllOwnersHandler = catchAsync(
     });
   }
 );
-const createTurfManagerHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const { turfUserId } = req.body;
-  const ownerId = req.user ? req.user.userId : "";
+// const createTurfManagerHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+//   const { turfUserId } = req.body;
+//   const ownerId = req.user ? req.user.userId : "";
 
-  const payload: PromoteManagerPayload = { turfUserId, ownerId };
-  const result = await UserService.promoteToManager(payload);
+//   const payload: PromoteManagerPayload = { turfUserId, ownerId };
+//   const result = await UserService.promoteToManager(payload);
 
-  sendResponse(res, {
-    success: true,
-    statusCode: httpStatus.CREATED,
-    message: 'Turf User promoted to Manager successfully',
-    data: result,
-  });
-});
+//   sendResponse(res, {
+//     success: true,
+//     statusCode: httpStatus.CREATED,
+//     message: 'Turf User promoted to Manager successfully',
+//     data: result,
+//   });
+// });
 
 const getManagersByTurfProfileHandler = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -95,7 +95,7 @@ const myTrufProfile = catchAsync(
 
 export const UserController = {
   createTurfOwnerHandler,
-  createTurfManagerHandler,
+  // createTurfManagerHandler,
   getAllOwnersHandler,
   getManagersByTurfProfileHandler,
   myTrufProfile

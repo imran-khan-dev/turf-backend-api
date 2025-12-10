@@ -13,7 +13,7 @@ router.post("/register-owner", multerUpload.single("file"),
 
 router.get("/get-owners", checkAuth("ADMIN", "SUPER_ADMIN"), UserController.getAllOwnersHandler);
 
-router.post("/create-manager", checkAuth("OWNER"), UserController.createTurfManagerHandler);
+// router.post("/create-manager", checkAuth("OWNER"), UserController.createTurfManagerHandler);
 router.get("/get-managers/:turfProfileId", checkAuth("OWNER"), UserController.getManagersByTurfProfileHandler);
 router.get("/my-turf-profile", checkAuth("OWNER"), UserController.myTrufProfile);
 

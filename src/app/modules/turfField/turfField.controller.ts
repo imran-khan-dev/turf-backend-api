@@ -4,7 +4,6 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { TurfFieldService } from "./turfField.service";
 import { prisma } from '../../../db';
-import ca from 'zod/v4/locales/ca.cjs';
 
 const createTurfFieldHandler = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
@@ -33,8 +32,6 @@ const createTurfFieldHandler = catchAsync(
             data: result,
         });
     });
-
-
 
 const updateTurfFieldHandler = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {

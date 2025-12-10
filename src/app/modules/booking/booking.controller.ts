@@ -51,8 +51,6 @@ export const getFieldSlots = async (req: Request, res: Response) => {
     return res.json(enriched);
 };
 
-
-
 export const createBooking = catchAsync(async (req: Request, res: Response) => {
     const { turfProfileId, turfFieldId, startISO, endISO } = req.body;
 
@@ -76,45 +74,6 @@ export const createBooking = catchAsync(async (req: Request, res: Response) => {
 });
 
 
-
-// export const getBookings = async (req: Request, res: Response) => {
-//     const auth = (req as any).user;
-//     if (!auth) return res.status(401).json({ message: "not authenticated" });
-
-//     // if turf user
-//     if (auth.role === "TURF_USER" && auth.turfUserId) {
-//         const bookings = await prisma.booking.findMany(
-//             { where: { turfUserId: auth.turfUserId, turfProfileId: auth.turfProfileId } });
-//         return res.json(bookings);
-//     }
-
-//     const ownerUserId = auth.userId
-
-//     if (ownerUserId) {
-//         const ownerBookings = await prisma.turfProfile.findUnique({
-//             where: { ownerId: ownerUserId },
-//             include: {
-//                 turfItems: {
-//                     include: {
-//                         bookings: {
-//                             include: {
-//                                 user: true,       // If booked by global User
-//                                 turfUser: true,   // If booked by TurfUser
-//                             },
-//                         },
-//                     },
-//                 },
-//             },
-//         });
-
-
-//         return res.json(ownerBookings);
-//     }
-
-
-//     return res.status(403).json({ message: "No bookings found" });
-// };
-
 export const getBookingById = async (req: Request, res: Response) => {
     const bookingId = req.params.id;
 
@@ -129,8 +88,6 @@ export const getBookingById = async (req: Request, res: Response) => {
             payment: true,
         },
     });
-
-    console.log("AzadBook", booking)
 
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
@@ -169,9 +126,6 @@ export const getBookings = async (req: Request, res: Response) => {
         res.status(500).json({ success: false, message: err.message || "Internal server error" });
     }
 };
-
-
-
 
 
 export const bookingController = { getFieldSlots, createBooking, getBookings, getBookingById };
