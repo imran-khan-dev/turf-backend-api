@@ -126,7 +126,7 @@ export const checkAuth =
           user = await prisma.user.findUnique({ where: { id: decoded.userId } });
         } else if (decoded.role === "TURF_USER") {
           user = await prisma.turfUser.findUnique({ where: { id: decoded.userId } });
-        } else if (decoded.role === "ADMIN") {
+        } else if (decoded.role === "ADMIN" || decoded.role === "SUPER_ADMIN") {
           user = await prisma.admin.findUnique({ where: { id: decoded.adminId } });
         }
 

@@ -6,6 +6,8 @@ import checkAuth from '../../middlewares/checkAuth';
 
 const router = express.Router();
 
-router.post("/register", checkAuth("SUPER_ADMIN"), validateRequest(createAdminZodSchema), AdminController.createAdminHandler);
+router.post("/create-admin", checkAuth("SUPER_ADMIN"), validateRequest(createAdminZodSchema), AdminController.createAdminHandler);
+
+router.delete("/delete-admin/:email", checkAuth("SUPER_ADMIN"), AdminController.deleteAdminHandler);
 
 export const AdminRoutes = router;

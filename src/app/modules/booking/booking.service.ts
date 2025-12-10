@@ -177,6 +177,7 @@ export const getBookingsService = async (
             orderBy: { startTime: "desc" },
         });
 
+        console.log("turfUserBooking", bookings)
         const total = await prisma.booking.count({
             where: {
                 turfUserId: auth.turfUserId,

@@ -7,6 +7,7 @@ export const createAdminTokens = (admin: Admin) => {
     const payload = {
         adminId: admin.id,
         role: admin.role, // SUPER_ADMIN | MANAGER_ADMIN
+        name: admin.name,
         email: admin.email,
     };
 

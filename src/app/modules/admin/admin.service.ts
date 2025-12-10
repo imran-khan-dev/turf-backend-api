@@ -32,4 +32,10 @@ const createAdmin = async (payload: Prisma.AdminCreateInput): Promise<Admin> => 
     return admin;
 };
 
-export const AdminService = { createAdmin };
+const deleteAdmin = async (email: string): Promise<Admin> => {
+    const admin = await prisma.admin.delete({
+        where: { email },
+    });
+    return admin;
+}
+export const AdminService = { createAdmin, deleteAdmin };

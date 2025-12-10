@@ -14,6 +14,7 @@ interface EnvConfig {
   ADMIN_EMAIL: string;
   ADMIN_PASSWORD: string;
   ADMIN_PHONE: string;
+  ADMIN_PHOTO: string;
   EXPRESS_SESSION_SECRET: string;
   FRONTEND_URL: string;
   CLOUDINARY: {
@@ -44,6 +45,7 @@ const loadEnvVariables = (): EnvConfig => {
     "ADMIN_EMAIL",
     "ADMIN_PASSWORD",
     "ADMIN_PHONE",
+    "ADMIN_PHOTO",
     "EXPRESS_SESSION_SECRET",
     "FRONTEND_URL",
     "CLOUDINARY_CLOUD_NAME",
@@ -77,6 +79,7 @@ const loadEnvVariables = (): EnvConfig => {
     ADMIN_EMAIL: process.env.ADMIN_EMAIL as string,
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD as string,
     ADMIN_PHONE: process.env.ADMIN_PHONE as string,
+    ADMIN_PHOTO: process.env.ADMIN_PHOTO as string,
     EXPRESS_SESSION_SECRET: process.env.EXPRESS_SESSION_SECRET as string,
     CLOUDINARY: {
       CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
