@@ -33,8 +33,6 @@ const makePayment = async (req: Request, res: Response) => {
 
         const callbackURL = `${envVars.APP_BASE_URL}/api/v1/payment/callback?dBPayId=${encodeURIComponent(paymentId)}&turfProfileSlug=${encodeURIComponent(turfPrfile.slug)}`;
 
-        console.log("callbackurl", callbackURL)
-
         const paymentDetails = {
             amount: payment.amount,
             callbackURL,
@@ -53,6 +51,7 @@ const makePayment = async (req: Request, res: Response) => {
 
         return res.json({
             message: "Payment created",
+            transantionStatus: response.transactionStatus,
             url: response.bkashURL,
         });
     } catch (err) {
@@ -75,8 +74,6 @@ const callback = async (req: Request, res: Response) => {
 
 
 
-        console.log("thefucking", dbPaymentId)
-
         const executeResponse = await executePayment(bkashConfig, paymentID);
         console.log("Execute Payment Response:", executeResponse);
 
@@ -85,16 +82,12 @@ const callback = async (req: Request, res: Response) => {
         }
 
         const success = executeResponse.statusCode === "0000";
-        console.log("codeSuccess?:", success)
         const appPaymentId = executeResponse.merchantInvoiceNumber;
 
         if (!appPaymentId) {
             console.error("Missing merchantInvoiceNumber!");
             return res.redirect(`${origin}/payment/cancel?bookingId=${dbPaymentId?.bookingId}&turfProfileSlug=${turfProfileSlug}`);
         }
-
-
-        console.log("apppayId", appPaymentId)
 
         // Transaction because we update 2 tables
         await prisma.$transaction(async (tx) => {

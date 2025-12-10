@@ -3,7 +3,7 @@ import httpStatus from 'http-status-codes';
 import { Request, Response } from "express";
 import { generateSlotsForDate } from "../../utils/slotUtils";
 import { prisma } from "../../../db";
-import { createBookingAndPayment } from "./booking.service";
+import { createBookingAndPayment, getBookingsService } from "./booking.service";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 
@@ -52,45 +52,21 @@ export const getFieldSlots = async (req: Request, res: Response) => {
 };
 
 
-// export const createBooking = async (req: Request, res: Response) => {
-//     const { turfProfileId, turfFieldId, startTimeISO, endTimeISO, turfUserId } = req.body;
-//     const userId = (req as any).user?.id ?? undefined;
-
-//     console.log("bookingUserId", userId)
-
-//     try {
-//         const { booking, payment } = await createBookingAndPayment({
-//             turfProfileId,
-//             turfFieldId,
-//             startTimeISO,
-//             endTimeISO,
-//             userId,
-//             turfUserId,
-//         });
-
-
-//         return res.json({ booking, payment });
-//     } catch (err: any) {
-//         return res.status(400).json({ message: err.message || "Booking failed" });
-//     }
-// };
 
 export const createBooking = catchAsync(async (req: Request, res: Response) => {
-    const { turfProfileId, turfFieldId, startISO, endISO, turfUserId } = req.body;
-    const userId = (req as any).user?.id ?? undefined;
+    const { turfProfileId, turfFieldId, startISO, endISO } = req.body;
 
-    console.log("bookingUserId", userId);
+    const user = (req as any).user
+
 
     const result = await createBookingAndPayment({
         turfProfileId,
         turfFieldId,
         startISO,
         endISO,
-        userId,
-        turfUserId,
+        user,
     });
 
-    console.log("bookingResult", result)
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.OK,
@@ -101,132 +77,43 @@ export const createBooking = catchAsync(async (req: Request, res: Response) => {
 
 
 
-
-// export const getBookings = catchAsync(async (req: Request, res: Response) => {
+// export const getBookings = async (req: Request, res: Response) => {
 //     const auth = (req as any).user;
-//     if (!auth) {
-//         return sendResponse(res, {
-//             success: false,
-//             statusCode: httpStatus.UNAUTHORIZED,
-//             message: "Not authenticated",
-//             data: null,
-//         });
-//     }
+//     if (!auth) return res.status(401).json({ message: "not authenticated" });
 
-//     const { bookingId, date } = req.query;
-//     let bookings;
-
-//     // 1️⃣ Turf-specific user (customer)
+//     // if turf user
 //     if (auth.role === "TURF_USER" && auth.turfUserId) {
-//         bookings = await prisma.booking.findMany({
-//             where: {
-//                 turfUserId: auth.turfUserId,
-//                 ...(bookingId ? { id: bookingId.toString() } : {}),
-//                 ...(date ? { startTime: { gte: new Date(date.toString()) } } : {}),
-//             },
-//             include: {
-//                 turfField: true,
-//                 turfUser: true,
-//             },
-//             orderBy: { startTime: "asc" },
-//         });
-
-//         return sendResponse(res, {
-//             success: true,
-//             statusCode: httpStatus.OK,
-//             message: "Bookings fetched successfully",
-//             data: bookings,
-//         });
+//         const bookings = await prisma.booking.findMany(
+//             { where: { turfUserId: auth.turfUserId, turfProfileId: auth.turfProfileId } });
+//         return res.json(bookings);
 //     }
 
-//     // 2️⃣ Turf owner
-//     if (auth.role === "USER" && auth.id) {
-//         bookings = await prisma.booking.findMany({
-//             where: {
-//                 turfField: {
-//                     turf: {
-//                         ownerId: auth.id,
+//     const ownerUserId = auth.userId
+
+//     if (ownerUserId) {
+//         const ownerBookings = await prisma.turfProfile.findUnique({
+//             where: { ownerId: ownerUserId },
+//             include: {
+//                 turfItems: {
+//                     include: {
+//                         bookings: {
+//                             include: {
+//                                 user: true,       // If booked by global User
+//                                 turfUser: true,   // If booked by TurfUser
+//                             },
+//                         },
 //                     },
 //                 },
-//                 ...(bookingId ? { id: bookingId.toString() } : {}),
-//                 ...(date ? { startTime: { gte: new Date(date.toString()) } } : {}),
 //             },
-//             include: {
-//                 turfField: true,
-//                 user: true,
-//                 turfUser: true,
-//             },
-//             orderBy: { startTime: "asc" },
 //         });
 
-//         // 3️⃣ Global user (regular)
-//         if (auth.userId) {
-//             bookings = await prisma.booking.findMany({
-//                 where: {
-//                     userId: auth.userId,
-//                     ...(bookingId ? { id: bookingId.toString() } : {}),
-//                     ...(date ? { startTime: { gte: new Date(date.toString()) } } : {}),
-//                 },
-//                 include: {
-//                     turfField: true,
-//                 },
-//                 orderBy: { startTime: "asc" },
-//             });
 
-//             return sendResponse(res, {
-//                 success: true,
-//                 statusCode: httpStatus.OK,
-//                 message: "Bookings fetched successfully",
-//                 data: bookings,
-//             });
-//         }
-
-//         return sendResponse(res, {
-//             success: false,
-//             statusCode: httpStatus.NOT_FOUND,
-//             message: "No bookings found",
-//             data: null,
-//         });
+//         return res.json(ownerBookings);
 //     }
-// });
-
-export const getBookings = async (req: Request, res: Response) => {
-    const auth = (req as any).user;
-    if (!auth) return res.status(401).json({ message: "not authenticated" });
-
-    // if turf user
-    if (auth.role === "TURF_USER" && auth.turfUserId) {
-        const bookings = await prisma.booking.findMany(
-            { where: { turfUserId: auth.turfUserId, turfProfileId: auth.turfProfileId } });
-        return res.json(bookings);
-    }
-
-    const ownerUserId = auth.userId
-
-    if (ownerUserId) {
-        const ownerBookings = await prisma.turfProfile.findUnique({
-            where: { ownerId: ownerUserId },
-            include: {
-                turfItems: {
-                    include: {
-                        bookings: {
-                            include: {
-                                user: true,       // If booked by global User
-                                turfUser: true,   // If booked by TurfUser
-                            },
-                        },
-                    },
-                },
-            },
-        });
 
 
-        return res.json(ownerBookings);
-    }
-
-
-    return res.status(403).json({ message: "No bookings found" });
-};
+//     return res.status(403).json({ message: "No bookings found" });
+// };
 
 export const getBookingById = async (req: Request, res: Response) => {
     const bookingId = req.params.id;
@@ -243,6 +130,8 @@ export const getBookingById = async (req: Request, res: Response) => {
         },
     });
 
+    console.log("AzadBook", booking)
+
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
 
@@ -253,6 +142,36 @@ export const getBookingById = async (req: Request, res: Response) => {
         data: booking,
     });
 };
+
+
+export const getBookings = async (req: Request, res: Response) => {
+    try {
+        const auth = (req as any).user;
+        if (!auth) return res.status(401).json({ message: "Not authenticated" });
+
+        // Extract query parameters
+        const { status, startDate, endDate, turfFieldId, page, limit } = req.query;
+
+        const filters = {
+            status: status as string | undefined,
+            startDate: startDate as string | undefined,
+            endDate: endDate as string | undefined,
+            turfFieldId: turfFieldId as string | undefined,
+            page: page ? Number(page) : undefined,
+            limit: limit ? Number(limit) : undefined,
+        };
+
+        const result = await getBookingsService(auth, filters);
+
+        res.json({ success: true, data: result });
+    } catch (err: any) {
+        console.error("getBookingsController error:", err);
+        res.status(500).json({ success: false, message: err.message || "Internal server error" });
+    }
+};
+
+
+
 
 
 export const bookingController = { getFieldSlots, createBooking, getBookings, getBookingById };

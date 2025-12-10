@@ -105,7 +105,6 @@ export const checkAuth =
             undefined;
         }
 
-        console.log("checkToken", token)
 
         // 3️⃣ No token → unauthorized
         if (!token) {
@@ -115,7 +114,6 @@ export const checkAuth =
         // Decode token
         const decoded = verifyToken(token, envVars.JWT_ACCESS_SECRET) as JwtPayload;
 
-        console.log("decoedToken", decoded)
         // Role restriction
         if (!allowedRoles.includes(decoded.role)) {
           throw new AppError(403, "Forbidden: Access denied");
@@ -137,7 +135,6 @@ export const checkAuth =
         // Attach to req
         req.user = { ...decoded, dbUser: user };
 
-        console.log("reqUser", req.user)
 
         next();
       } catch (error) {

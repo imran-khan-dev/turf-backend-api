@@ -48,7 +48,7 @@ const updateTurfUserHandler = catchAsync(async (req, res) => {
 
 const allTurfUserHandler = catchAsync(async (req: Request, res: Response) => {
     const { turfProfileId } = req.query as { turfProfileId?: string };
-    
+
     const users = await TurfUserService.getAllTurfUsers(turfProfileId);
 
     sendResponse(res, {

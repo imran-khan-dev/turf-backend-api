@@ -40,16 +40,15 @@ export async function createBookingAndPayment({
     turfFieldId,
     startISO,
     endISO,
-    userId,
-    turfUserId,
-}: {
-    turfProfileId: string;
-    turfFieldId: string;
-    startISO: string;
-    endISO: string;
-    userId?: string;
-    turfUserId?: string;
-}) {
+    user }: {
+        turfProfileId: string;
+        turfFieldId: string;
+        startISO: string;
+        endISO: string;
+        user?: any;
+    }) {
+
+
     return await prisma.$transaction(async (tx) => {
         const conflict = await tx.booking.findFirst({
             where: {
@@ -70,21 +69,23 @@ export async function createBookingAndPayment({
         let payerUserName: string | null = null;
         let payerUserEmail: string | null = null;
 
-        if (userId) {
-            const user = await tx.user.findUnique({ where: { id: userId } });
-            if (user) {
-                payerUserId = user.id;
-                payerUserName = user.name;
-                payerUserEmail = user.email;
-            }
-        } else if (turfUserId) {
-            const turfUser = await tx.turfUser.findUnique({ where: { id: turfUserId } });
-            if (turfUser) {
-                payerUserId = turfUser.id;
-                payerUserName = turfUser.name;
-                payerUserEmail = turfUser.email;
-            }
+        if (user) {
+            payerUserId = user.userId;
+            payerUserName = user.name;
+            payerUserEmail = user.email;
+
         }
+        // } else if (turfUserId) {
+        //     const turfUser = await tx.turfUser.findUnique({ where: { id: turfUserId } });
+        //     if (turfUser) {
+        //         payerUserId = turfUser.userId;
+        //         payerUserName = turfUser.name;
+        //         payerUserEmail = turfUser.email;
+        //     }
+        // }
+
+
+
 
         if (turfFieldId === null) throw new AppError(404, "Turf field not found");
 
@@ -98,8 +99,8 @@ export async function createBookingAndPayment({
             data: {
                 turfProfileId,
                 turfFieldId,
-                userId: userId ?? null,
-                turfUserId: turfUserId ?? null,
+                userId: user.role === "OWNER" || user.role === "MANAGER" ? user.userId : null,
+                turfUserId: user.role === "TURF_USER" ? user.userId : null,
                 startTime: new Date(startISO),
                 endTime: new Date(endISO),
                 paymentAmount,
@@ -123,3 +124,103 @@ export async function createBookingAndPayment({
         return { booking, payment };
     });
 }
+
+
+
+
+interface BookingFilters {
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+    turfFieldId?: string;
+    page?: number;
+    limit?: number;
+}
+
+export const getBookingsService = async (
+    auth: any,
+    filters: BookingFilters
+) => {
+    const { status, startDate, endDate, turfFieldId, page = 1, limit = 20 } = filters;
+
+    const baseWhere: any = {};
+    if (status) baseWhere.status = status;
+    if (startDate || endDate) {
+        baseWhere.startTime = {};
+        if (startDate) baseWhere.startTime.gte = new Date(startDate);
+        if (endDate) baseWhere.startTime.lte = new Date(endDate);
+    }
+    // if (turfFieldId) baseWhere.turfFieldId = turfFieldId;
+
+    console.log("AuthRole", auth)
+
+    console.log('checkBase', baseWhere)
+    console.log("authField", auth.turfProfileId)
+
+
+    // --- Turf User Logic ---
+    if (auth.role === "TURF_USER" && auth.userId) {
+        const bookings = await prisma.booking.findMany({
+            where: {
+                turfUserId: auth.userId,
+                turfProfileId: auth.turfProfileId,
+                // ...baseWhere,
+            },
+            include: {
+                turfField: true,
+                user: true,
+                turfUser: true,
+                payment: true,
+            },
+            // take: limit,
+            // skip: (page - 1) * limit,
+            orderBy: { startTime: "desc" },
+        });
+
+        const total = await prisma.booking.count({
+            where: {
+                turfUserId: auth.turfUserId,
+                turfProfileId: auth.turfProfileId,
+                ...baseWhere,
+
+            },
+
+
+        });
+
+        console.log("turfUserBook", bookings)
+        return { bookings, total };
+    }
+
+    // --- Owner Logic ---
+    if (auth.userId) {
+        const ownerProfiles = await prisma.turfProfile.findMany({
+            where: { ownerId: auth.userId },
+            include: {
+                turfItems: {
+                    include: {
+                        bookings: {
+                            where: baseWhere,
+                            include: {
+                                user: true,
+                                turfUser: true,
+                                turfField: true,
+                            },
+                            orderBy: { startTime: "desc" },
+                        },
+                    },
+                },
+            },
+        });
+
+        // Flatten all bookings from multiple turfItems
+        const bookings = ownerProfiles.flatMap((profile) =>
+            profile.turfItems.flatMap((item) => item.bookings)
+        );
+
+        return { bookings, total: bookings.length };
+    }
+
+    throw new Error("User role not recognized for booking fetch");
+};
+
