@@ -2,6 +2,7 @@ import { Admin, Prisma } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { prisma } from "../../../db";
 import { envVars } from "../../config/env";
+import AppError from "../../errorHelpers/AppError";
 
 const createAdmin = async (payload: Prisma.AdminCreateInput): Promise<Admin> => {
     const { email, password, name, phone } = payload;
@@ -12,7 +13,7 @@ const createAdmin = async (payload: Prisma.AdminCreateInput): Promise<Admin> => 
     });
 
     if (existingAdmin) {
-        throw new Error("Admin already exists!");
+        throw new AppError(400, "Admin already exists!");
     }
 
     // Hash password
@@ -33,6 +34,15 @@ const createAdmin = async (payload: Prisma.AdminCreateInput): Promise<Admin> => 
 };
 
 const deleteAdmin = async (email: string): Promise<Admin> => {
+
+    const existingAdmin = await prisma.admin.findUnique({
+        where: { email },
+    });
+
+    if (!existingAdmin) {
+        throw new AppError(400, "Admin not found!");
+    }
+
     const admin = await prisma.admin.delete({
         where: { email },
     });

@@ -28,37 +28,51 @@ const createTurfProfile = async (payload: Prisma.TurfProfileCreateInput) => {
 const updateTurfProfile = async (payload: UpdateTurfProfileInput): Promise<Partial<TurfProfile>> => {
     const { turfProfileId, data, files } = payload;
 
-    // Check if TurfProfile exists
+    // Check existing profile
     const existingProfile = await prisma.turfProfile.findUnique({
         where: { id: turfProfileId },
     });
     if (!existingProfile) throw new AppError(404, "Turf Profile not found");
 
-    const updateData: Prisma.TurfProfileUpdateInput = { ...data };
+    // ---- FIX: Clean raw body BEFORE converting to Prisma type ----
+    const rawData: Record<string, any> = { ...data };
 
-    // Handle file uploads & replace old images
+    Object.keys(rawData).forEach((key) => {
+        const value = rawData[key];
+
+        if (value === "" || value === null || value === undefined) {
+            delete rawData[key];
+        }
+    });
+
+    let updateData: Prisma.TurfProfileUpdateInput = {
+        ...rawData,
+    };
+
+    // ---- FILE UPLOAD LOGIC ----
     if (files) {
         const fileFields = ["logo", "heroImage", "aboutImg"] as const;
 
         for (const field of fileFields) {
             const fileArray = files[field];
-            if (fileArray && fileArray.length > 0) {
-                // Delete old image
+            if (fileArray?.length) {
+
+                // Delete old
                 if (existingProfile[field]) {
                     await deleteImageFromCLoudinary(existingProfile[field]!);
                 }
 
-                // Upload new image to Cloudinary
                 const uploaded = await cloudinaryUpload.uploader.upload(fileArray[0].path, {
                     folder: "turf_profiles",
                 });
 
+                // Safe assign
                 updateData[field] = uploaded.secure_url;
             }
         }
     }
 
-    // Update only modified fields
+    // ---- FINAL UPDATE ----
     const updatedProfile = await prisma.turfProfile.update({
         where: { id: turfProfileId },
         data: updateData,
@@ -66,6 +80,51 @@ const updateTurfProfile = async (payload: UpdateTurfProfileInput): Promise<Parti
 
     return updatedProfile;
 };
+
+
+// const updateTurfProfile = async (payload: UpdateTurfProfileInput): Promise<Partial<TurfProfile>> => {
+//     const { turfProfileId, data, files } = payload;
+
+//     // Check if TurfProfile exists
+//     const existingProfile = await prisma.turfProfile.findUnique({
+//         where: { id: turfProfileId },
+//     });
+//     if (!existingProfile) throw new AppError(404, "Turf Profile not found");
+
+//     const updateData: Prisma.TurfProfileUpdateInput = { ...data };
+
+//     // Handle file uploads & replace old images
+//     if (files) {
+//         const fileFields = ["logo", "heroImage", "aboutImg"] as const;
+
+//         for (const field of fileFields) {
+//             const fileArray = files[field];
+//             if (fileArray && fileArray.length > 0) {
+//                 // Delete old image
+//                 if (existingProfile[field]) {
+//                     await deleteImageFromCLoudinary(existingProfile[field]!);
+//                 }
+
+//                 // Upload new image to Cloudinary
+//                 const uploaded = await cloudinaryUpload.uploader.upload(fileArray[0].path, {
+//                     folder: "turf_profiles",
+//                 });
+
+//                 updateData[field] = uploaded.secure_url;
+//             }
+//         }
+//     }
+
+//     // Update only modified fields
+//     const updatedProfile = await prisma.turfProfile.update({
+//         where: { id: turfProfileId },
+//         data: updateData,
+//     });
+
+//     return updatedProfile;
+// };
+
+
 
 const getTurfProfile = async (turfProfileSlug: string) => {
 

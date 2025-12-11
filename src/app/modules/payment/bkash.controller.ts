@@ -21,9 +21,13 @@ const makePayment = async (req: Request, res: Response) => {
 
         const payment = await prisma.payment.findUnique({ where: { id: paymentId } });
 
+        console.log("check payment data", payment)
+
         if (!payment) return res.status(404).json({ message: "Payment not found" });
 
         const booking = await prisma.booking.findUnique({ where: { id: payment.bookingId } });
+
+        console.log("check booking data", booking)
 
         if (!booking) return res.status(404).json({ message: "Booking not found" });
 
@@ -63,6 +67,7 @@ const makePayment = async (req: Request, res: Response) => {
 const callback = async (req: Request, res: Response) => {
     try {
         const { paymentID, dBPayId, turfProfileSlug } = req.query;
+
         const origin = envVars.FRONTEND_URL;
 
         const dbPaymentId = await prisma.payment.findUnique({ where: { id: dBPayId as string } });
@@ -71,8 +76,6 @@ const callback = async (req: Request, res: Response) => {
         if (!paymentID || typeof paymentID !== "string") {
             return res.redirect(`${origin}/payment/cancel?bookingId=${dbPaymentId?.bookingId}&turfProfileSlug=${turfProfileSlug}`);
         }
-
-
 
         const executeResponse = await executePayment(bkashConfig, paymentID);
         console.log("Execute Payment Response:", executeResponse);

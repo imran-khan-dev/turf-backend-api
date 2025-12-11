@@ -34,6 +34,9 @@ export async function createPayment(
 
         const { amount, callbackURL, paymentID, reference } = paymentDetails;
 
+        console.log("bkashPayment", amount, callbackURL, paymentID, reference)
+        console.log("bkashConfig", bkashConfig)
+
         if (!amount || amount < 1) {
             return { statusCode: 400, statusMessage: "Invalid amount" };
         }
@@ -55,6 +58,8 @@ export async function createPayment(
             },
             { headers: await authHeaders(bkashConfig) }
         );
+
+        console.log("bKash raw Response:", response);
 
         return response.data;
     } catch (error: any) {
