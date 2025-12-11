@@ -150,12 +150,6 @@ export const getBookingsService = async (
         if (startDate) baseWhere.startTime.gte = new Date(startDate);
         if (endDate) baseWhere.startTime.lte = new Date(endDate);
     }
-    // if (turfFieldId) baseWhere.turfFieldId = turfFieldId;
-
-    console.log("AuthRole", auth)
-
-    console.log('checkBase', baseWhere)
-    console.log("authField", auth.turfProfileId)
 
 
     // --- Turf User Logic ---
@@ -177,7 +171,6 @@ export const getBookingsService = async (
             orderBy: { startTime: "desc" },
         });
 
-        console.log("turfUserBooking", bookings)
         const total = await prisma.booking.count({
             where: {
                 turfUserId: auth.turfUserId,
@@ -189,7 +182,6 @@ export const getBookingsService = async (
 
         });
 
-        console.log("turfUserBook", bookings)
         return { bookings, total };
     }
 
