@@ -6,7 +6,8 @@ import { TurfProfileService } from './turfProfile.service';
 import AppError from '../../errorHelpers/AppError';
 
 const createTurfProfileHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const ownerId = req.user ? req.user.userId : "";
+    // const ownerId = req.user ? req.user.userId : "";
+    const ownerId = req.user ? (req.user as { userId: string }).userId : "";
 
     if (!ownerId) {
         throw new AppError(401, "Unauthorized. Owner ID is missing.");
