@@ -39,7 +39,7 @@ declare global {
       user?: {
         userId?: string;
         role?: string;
-        dbUser?: User | Admin | TurfUser; // actual DB object
+        dbUser?: User | Admin | TurfUser; 
         adminId?: string;
       };
     }

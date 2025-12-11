@@ -38,6 +38,7 @@ export const checkAuth =
 
         // Decode token
         const decoded = verifyToken(token, envVars.JWT_ACCESS_SECRET) as JwtPayload & { userId?: string; adminId?: string; role: string };;
+        // const decoded = verifyToken(token, envVars.JWT_ACCESS_SECRET) as JwtPayload
 
         // Role restriction
         if (!allowedRoles.includes(decoded.role)) {
