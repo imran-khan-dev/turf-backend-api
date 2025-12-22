@@ -126,17 +126,32 @@ const updateTurfProfile = async (payload: UpdateTurfProfileInput): Promise<Parti
 
 
 
-const getTurfProfile = async (turfProfileSlug: string) => {
+const getTurfProfile = async ({
+    slug,
+    id,
+}: {
+    slug?: string;
+    id?: string;
+}) => {
+    if (!slug && !id) {
+        throw new Error("Turf profile slug or id is required");
+    }
 
-    if (!turfProfileSlug) throw new Error("TurfProfileSlug parameter is required");
-
-    const turfProfileDetails = await prisma.turfProfile.findFirst({
-        where: { slug: turfProfileSlug },
+    const turfProfile = await prisma.turfProfile.findFirst({
+        where: {
+            OR: [
+                slug ? { slug } : undefined,
+                id ? { id } : undefined,
+            ].filter(Boolean) as any,
+        },
     });
 
-    if (!turfProfileDetails) throw new Error("Turf Profile not found");
+    if (!turfProfile) {
+        throw new Error("Turf Profile not found");
+    }
 
-    return turfProfileDetails
+    return turfProfile;
 };
+
 
 export const TurfProfileService = { createTurfProfile, updateTurfProfile, getTurfProfile };

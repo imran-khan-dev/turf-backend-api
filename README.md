@@ -2,8 +2,7 @@
 
 This backend powers the Turf Booking Management SaaS platform. It provides secure APIs for multi-role authentication, turf management, booking workflows, payments, and administrative actions.
 
-The system is built with scalability and clean architecture in mind, using Express.js, TypeScript, Prisma ORM, and PostgreSQL.
----
+## The system is built with scalability and clean architecture in mind, using Express.js, TypeScript, Prisma ORM, and PostgreSQL.
 
 ## 🌐 Live Frontend
 
@@ -15,6 +14,7 @@ The system is built with scalability and clean architecture in mind, using Expre
 ## 🚀 Core Features
 
 ### 🔐 Authentication & Authorization
+
 - **JWT-based authentication** for secure access.
 - **HTTP-only cookies** for storing access tokens safely.
 - **Password hashing** with bcrypt.
@@ -22,26 +22,29 @@ The system is built with scalability and clean architecture in mind, using Expre
 - **Seeded Admin User** automatically created in database for initial login.
 - **Role-based access control**
 
-
 ### 🖼️ File Uploads
+
 - **Multer** for handling file uploads.
 - **Cloudinary** integration for image hosting.
 
 ### ⚙️ Error Handling
+
 - Centralized **global error handler** for consistent API responses.
 - **Custom API error classes** for validation, authentication, and permission errors.
 - **Prisma-specific error handling** for database constraint or relation issues.
 - Graceful handling of server and unexpected runtime errors.
 
 ### 🧩 Architecture & Structure
+
 - **Clean Modular Structure**:
-  - `modules/` for feature-based logic 
+  - `modules/` for feature-based logic
   - `middlewares/` for reusable middleware functions
   - `utils/` for helpers (token generation, file handling)
   - `errors/` for global error classes
   - `config/` for environment setup (Cloudinary, DB, etc.)
 
 ### 🧰 Tech Stack
+
 - **Node.js + Express.js**
 - **TypeScript**
 - **Prisma ORM**
@@ -52,6 +55,7 @@ The system is built with scalability and clean architecture in mind, using Expre
 - **Dotenv** for environment config
 
 ---
+
 ## Key Highlights
 
 ✅ Type-safe backend with TypeScript
@@ -61,4 +65,3 @@ The system is built with scalability and clean architecture in mind, using Expre
 ✅ Cloudinary image upload
 ✅ Seeded admin for immediate login
 ✅ Clean & maintainable architecture
-

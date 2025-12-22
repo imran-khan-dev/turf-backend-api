@@ -24,5 +24,6 @@ router.patch("/update/:id", checkAuth("OWNER"), multerUpload.fields([
     TurfProfileController.updateTurfProfileHandler);
 
 router.get("/get-turf-profile/:slug", TurfProfileController.getTurfProfileHandler);
+router.get("/get-turf-profile/id/:id", TurfProfileController.getTurfProfileHandler);
 
 export const TurfProfileRoutes = router;

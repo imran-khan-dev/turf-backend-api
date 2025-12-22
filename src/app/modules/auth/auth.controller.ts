@@ -5,9 +5,9 @@ import { createUserTokens } from "../../utils/userTokens";
 import { setAuthCookie } from "../../utils/setCookie";
 import { sendResponse } from "../../utils/sendResponse";
 import AppError from "../../errorHelpers/AppError";
-import { signToken } from "../../utils/jwt";
-import { envVars } from "../../config/env";
 import { createAdminTokens } from "../../utils/adminTokens";
+import jwt from "jsonwebtoken";
+import { envVars } from "../../config/env";
 
 
 const ownerLogin = (req: Request, res: Response, next: NextFunction) => {
@@ -121,6 +121,71 @@ const logout = (req: Request, res: Response) => {
   });
 };
 
+const turfUserSessionCheck = (req: Request, res: Response) => {
+  const token = req.cookies.turfUserAccess;
+  const { turfProfileId } = req.query;
+
+  if (!token) {
+    return sendResponse(res, {
+      success: true,
+      statusCode: 200,
+      message: "Turf user not authenticated",
+      data: {
+        isAuthenticated: false,
+      },
+    });
+  }
+
+  try {
+    const decoded = jwt.verify(
+      token,
+      envVars.JWT_ACCESS_SECRET
+    ) as {
+      userId: string;
+      name: string;
+      email: string;
+      turfProfileId: string;
+    };
+
+    if (
+      turfProfileId &&
+      decoded.turfProfileId !== String(turfProfileId)
+    ) {
+      return sendResponse(res, {
+        success: true,
+        statusCode: 200,
+        message: "Turf user logged in to another turf",
+        data: {
+          isAuthenticated: false,
+        },
+      });
+    }
+
+    return sendResponse(res, {
+      success: true,
+      statusCode: 200,
+      message: "Turf user authenticated",
+      data: {
+        isAuthenticated: true,
+        user: {
+          id: decoded.userId,
+          name: decoded.name,
+          email: decoded.email,
+          turfProfileId: decoded.turfProfileId,
+        },
+      },
+    });
+  } catch (error) {
+    return sendResponse(res, {
+      success: true,
+      statusCode: 200,
+      message: "Invalid turf user session",
+      data: {
+        isAuthenticated: false,
+      },
+    });
+  }
+};
 
 export const AuthControllers = {
   ownerLogin,
@@ -128,4 +193,5 @@ export const AuthControllers = {
   turfUserLogin,
   adminLogin,
   logout,
+  turfUserSessionCheck,
 };

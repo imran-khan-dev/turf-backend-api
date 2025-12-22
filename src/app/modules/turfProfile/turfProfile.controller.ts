@@ -84,12 +84,17 @@ const updateTurfProfileHandler = catchAsync(
 );
 
 const getTurfProfileHandler = catchAsync(
-    async (req: Request, res: Response, next: NextFunction) => {
-        const turfProfileSlug = req.params.slug;
+    async (req: Request, res: Response) => {
+        const { slug, id } = req.params;
 
-        if (!turfProfileSlug) throw new Error("TurfProfileSlug parameter is required");
+        if (!slug && !id) {
+            throw new Error("Turf profile slug or id is required");
+        }
 
-        const turfProfile = await TurfProfileService.getTurfProfile(turfProfileSlug);
+        const turfProfile = await TurfProfileService.getTurfProfile({
+            slug,
+            id,
+        });
 
         sendResponse(res, {
             success: true,

@@ -26,4 +26,6 @@ router.get("/sessions", (req, res) => {
     });
 });
 
+router.get("/turf-user-session", AuthControllers.turfUserSessionCheck);
+
 export const AuthRoutes = router;
