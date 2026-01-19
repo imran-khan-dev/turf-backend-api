@@ -69,6 +69,7 @@ const callback = async (req: Request, res: Response) => {
 
         const dbPaymentId = await prisma.payment.findUnique({ where: { id: dBPayId as string } });
 
+        console.log("callbackRunning?")
 
         if (!paymentID || typeof paymentID !== "string") {
             return res.redirect(`${origin}/payment/cancel?bookingId=${dbPaymentId?.bookingId}&turfProfileSlug=${turfProfileSlug}`);

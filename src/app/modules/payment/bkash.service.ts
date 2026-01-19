@@ -71,6 +71,34 @@ export async function executePayment(
     paymentID: string
 ) {
     try {
+
+        const paymentInfo = await prisma.payment.findUnique({
+            where: {
+                id: paymentID
+            }
+        })
+
+        if (!paymentInfo) {
+            return { statusCode: 400, statusMessage: "Payment not found" };
+        }
+
+        const bookingInfo = await prisma.booking.findUnique({
+            where: {
+                id: paymentInfo.bookingId
+            }
+        })
+
+        if (bookingInfo?.status === "PENDING") {
+            console.log("Blocking bKash execution: Slot expired or invalid status.");
+
+            // By returning here, we NEVER call the bKash Execute API.
+            // The user will see a failure on the bKash UI, and NO money is deducted.
+            return {
+                statusCode: "400",
+                statusMessage: "Booking session expired. Please try again."
+            };
+        }
+
         const response = await axios.post(
             `${bkashConfig.base_url}/tokenized/checkout/execute`,
             { paymentID },
