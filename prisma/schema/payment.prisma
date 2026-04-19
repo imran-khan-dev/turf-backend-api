@@ -3,19 +3,19 @@ model Payment {
   bookingId String  @unique
   booking   Booking @relation(fields: [bookingId], references: [id])
 
-  amount     Int
-  provider   String?
+  amount                Int
+  provider              String?
   providerPaymentStatus String?
   providerPaymentId     String?
-  providerResponse Json?
-  amountPaid Int?
-  status     PaymentStatus @default(PENDING)
-  payerId    String?
-  payerName  String?
-  payerEmail String?
-  trxId      String? // transaction id from payment gateway
+  providerResponse      Json?
+  amountPaid            Int?
+  status                PaymentStatus @default(PENDING)
+  payerId               String?
+  payerName             String?
+  payerEmail            String?
+  trxId                 String? // transaction id from payment gateway
 
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
   paidAt    DateTime?
 }
 
